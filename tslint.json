@@ -5,6 +5,7 @@
     "tslint-config-prettier"
   ],
   "rules": {
+    "no-eval": false,
     "import-name": false,
     "variable-name": false,
     "max-line-length": false,

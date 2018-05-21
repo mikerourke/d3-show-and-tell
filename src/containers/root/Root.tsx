@@ -3,7 +3,11 @@ import { Provider } from 'rebass';
 import { injectGlobal } from 'styled-components';
 
 injectGlobal`
-  @import url('https://fonts.googleapis.com/css?family=Roboto:300,400,500|Material+Icons');
+  @import url('https://fonts.googleapis.com/css?family=Quicksand|Roboto+Mono');
+  
+  * {
+    font-family: Quicksand, Helvetica, sans-serif;
+  }
   
   body {
     height: 100vh;
@@ -16,7 +20,7 @@ const Root = ({ children }) => (
   <Provider
     theme={{
       fonts: {
-        sans: '"Roboto", Helvetica, sans-serif',
+        sans: 'Quicksand, Helvetica, sans-serif',
       },
     }}
   >

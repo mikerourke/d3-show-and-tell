@@ -1,22 +1,12 @@
 import React from 'react';
-import styled from 'styled-components';
-import { Select, Toolbar } from 'rebass';
-import { CHART_NAMES } from '../../../constants';
+import { Heading, Toolbar } from 'rebass';
 
-const Header: React.SFC<{}> = () => {
-  const StyledSelect = styled(Select)`
-    max-width: 80px;
-  `;
-  return (
-    <Toolbar>
-      <h2>D3!</h2>
-      <StyledSelect ml="auto">
-        {CHART_NAMES.map(chartName => (
-          <option key={chartName}>{chartName}</option>
-        ))}
-      </StyledSelect>
-    </Toolbar>
-  );
-};
+const Header: React.SFC<{}> = () => (
+  <Toolbar p={2}>
+    <Heading is="h2" ml={2}>
+      D3 SHOW AND TELL
+    </Heading>
+  </Toolbar>
+);
 
 export default Header;

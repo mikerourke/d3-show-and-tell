@@ -1,5 +1,12 @@
 import React from 'react';
 import { render } from 'react-dom';
-import Routes from './Routes';
+import Root from './containers/root/Root';
+import App from './containers/app/App';
+import 'animate.css/animate.min.css';
 
-render(<Routes />, document.getElementById('root') as HTMLElement);
+render(
+  <Root>
+    <App />
+  </Root>,
+  document.getElementById('root') as HTMLElement,
+);
