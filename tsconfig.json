@@ -17,7 +17,10 @@
     "noUnusedLocals": false,
     "outDir": "build",
     "pretty": true,
-    "rootDir": "src",
+    "rootDirs": [
+      "src",
+      "config"
+    ],
     "sourceMap": true,
     "strictNullChecks": false,
     "suppressImplicitAnyIndexErrors": true,

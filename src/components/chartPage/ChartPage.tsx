@@ -1,7 +1,7 @@
 import React from 'react';
 // import { renderToStaticMarkup } from 'react-dom/server';
 import styled from 'styled-components';
-import { Box, Code, Panel, PanelHeader, Text, Flex } from 'rebass';
+import { Box, Panel, PanelHeader, Text, Flex } from 'rebass';
 import CollapsibleHeader from './components/CollapsibleHeader';
 import ShowIf from '../showIf/ShowIf';
 
@@ -47,14 +47,6 @@ class ChartPage extends React.Component<Props, State> {
       <StyledWrapper>
         <Flex>
           <Box width={1 / 2} mr={4}>
-            <Panel>
-              <PanelHeader color="white" bg="dimgray">
-                <Text fontSize={4}>CHART</Text>
-              </PanelHeader>
-              <Box p={2}>{chartContents}</Box>
-            </Panel>
-          </Box>
-          <Box width={1 / 2} ml={4}>
             <StyledPanel>
               <CollapsibleHeader
                 title="CODE"
@@ -62,7 +54,7 @@ class ChartPage extends React.Component<Props, State> {
                 onArrowClick={this.handlePanelClick('code')}
               />
               <ShowIf as={Box} p={2} isShown={this.state.codeShown}>
-                {codeContents}
+                <div />
               </ShowIf>
             </StyledPanel>
             <StyledSeparator />
@@ -73,9 +65,17 @@ class ChartPage extends React.Component<Props, State> {
                 onArrowClick={this.handlePanelClick('data')}
               />
               <ShowIf as={Box} p={2} isShown={this.state.dataShown}>
-                <div id="code-editor" />
+                <div id="json-editor" />
               </ShowIf>
             </StyledPanel>
+          </Box>
+          <Box width={1 / 2} ml={4}>
+            <Panel>
+              <PanelHeader color="white" bg="dimgray">
+                <Text fontSize={4}>CHART</Text>
+              </PanelHeader>
+              <Box p={2}>{chartContents}</Box>
+            </Panel>
           </Box>
         </Flex>
       </StyledWrapper>
