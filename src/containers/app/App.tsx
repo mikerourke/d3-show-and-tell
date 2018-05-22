@@ -1,54 +1,76 @@
 import React from 'react';
-import { Box, Flex, Panel, PanelHeader, Text } from 'rebass';
-import startCase from 'lodash/startCase';
+import { Box, Flex } from 'rebass';
+import styled from 'styled-components';
 import Header from './components/Header';
 import Editor from '../../components/editor/Editor';
-import lineChart from '../charts/snippets/lineChart';
-import stocksData from '../charts/data/stocks';
-import styled from 'styled-components';
+import { code, data } from '../../contents';
+import { BoxDimensions } from '../../types/commonTypes';
+
+const contentTypes = {
+  code: 'currentCode',
+  data: 'currentData',
+};
 
 interface State {
-  code: any;
-  data: any;
-  activeContent: any;
+  currentCode: string;
+  currentData: string | object;
+  contentType: string;
+  screenDimensions: BoxDimensions;
 }
 
+const getUpdatedDimensions = (): BoxDimensions => ({
+  height: window.innerHeight,
+  width: window.innerWidth,
+});
+
 class App extends React.Component<{}, State> {
-  codeElement: any;
+  codeElement: HTMLScriptElement;
 
   state = {
-    code: lineChart,
-    data: stocksData,
-    activeContent: 'data',
-  };
-
-  getValidData = () => JSON.stringify(this.state.data, null, '  ');
-
-  updateScriptContents = () => {
-    if (this.codeElement) {
-      document.body.removeChild(this.codeElement);
-    }
-    this.codeElement = document.createElement('script');
-    this.codeElement.text = `
-      var stocksData = ${this.getValidData()};
-      (function() {${this.state.code}})();
-    `;
-    document.body.appendChild(this.codeElement);
+    currentCode: code.charts.stocksChart,
+    currentData: data.charts.stocksData,
+    contentType: contentTypes.code,
+    screenDimensions: getUpdatedDimensions(),
   };
 
   componentDidMount() {
     this.updateScriptContents();
+    window.addEventListener('resize', this.updateDimensions);
   }
 
   componentDidUpdate(prevProps: any, prevState: any) {
     this.updateScriptContents();
   }
 
+  componentWillUnmount() {
+    window.removeEventListener('resize', this.updateDimensions);
+  }
+
+  updateDimensions = () => {
+    console.log('Yay');
+    this.setState({ screenDimensions: getUpdatedDimensions() });
+  };
+
+  getValidData = () => JSON.stringify(this.state.currentData, null, '  ');
+
+  updateScriptContents = () => {
+    if (this.codeElement) {
+      document.body.removeChild(this.codeElement);
+    }
+    document.querySelector('.chart').innerHTML = '';
+    this.codeElement = document.createElement('script');
+    this.codeElement.text = `
+      var stocksData = ${this.getValidData()};
+      (function() {${this.state.currentCode}})();
+    `;
+    document.body.appendChild(this.codeElement);
+  };
+
   onEditorChange = (newValue: any) => {
-    const { activeContent } = this.state;
+    const { contentType } = this.state;
     const validValue =
-      activeContent === 'data' ? JSON.parse(newValue) : newValue;
-    this.setState({ [activeContent as any]: validValue });
+      contentType === contentTypes.data ? JSON.parse(newValue) : newValue;
+    this.setState({ [contentType as any]: validValue });
   };
 
   handleSaveKeysPressed = () => {
@@ -56,20 +78,47 @@ class App extends React.Component<{}, State> {
   };
 
   swapType = () => {
-    const swappedType = this.state.activeContent === 'data' ? 'code' : 'data';
-    this.setState({ activeContent: swappedType });
+    const swappedType = {
+      [contentTypes.code]: contentTypes.data,
+      [contentTypes.data]: contentTypes.code,
+    }[this.state.contentType];
+    this.setState({ contentType: swappedType });
+  };
+
+  getDimensions = (): any => {
+    const { width, height } = this.state.screenDimensions;
+    const view = { width, height };
+
+    const margins = {
+      top: 16,
+      right: 16,
+      bottom: 24,
+      left: 16,
+    };
+
+    return {
+      view,
+      margins,
+      width: view.width - margins.left - margins.right,
+      height: view.height - margins.top - margins.bottom,
+    };
   };
 
   render() {
-    const StyledPanel = styled(Panel)`
-      height: 100%;
-      max-height: 800px;
-      width: 100%;
-      font-family: Quicksand, Helvetica, sans-serif;
-    `;
+    const { contentType, currentCode } = this.state;
+    const contents =
+      contentType === contentTypes.data ? this.getValidData() : currentCode;
 
-    const { activeContent, code } = this.state;
-    const contents = activeContent === 'data' ? this.getValidData() : code;
+    const language = {
+      [contentTypes.code]: 'javascript',
+      [contentTypes.data]: 'json',
+    }[contentType];
+
+    const screenDimensions = this.getDimensions();
+    const dimensions = {
+      height: screenDimensions.height - 64,
+      width: screenDimensions.width / 2 - 32,
+    };
 
     return (
       <div>
@@ -78,37 +127,20 @@ class App extends React.Component<{}, State> {
           <Box
             width={1 / 2}
             mx={2}
-            style={{ position: 'relative', maxWidth: 800 }}
+            pt={2}
+            style={{ border: '2px solid black' }}
           >
-            <StyledPanel>
-              <PanelHeader color="white" bg="dimgray">
-                <Flex align="center">
-                  <Text fontSize={4}>{startCase(activeContent)}</Text>
-                </Flex>
-              </PanelHeader>
-              <div style={{ height: 620, background: 'transparent' }} />
-            </StyledPanel>
             <Editor
               contents={contents}
-              language={activeContent === 'data' ? 'json' : 'javascript'}
+              language={language}
               onEditorChange={this.onEditorChange}
               onSaveKeysPressed={this.handleSaveKeysPressed}
               onSwapContents={this.swapType}
+              dimensions={dimensions}
             />
           </Box>
-          <Box
-            width={1 / 2}
-            mx={2}
-            style={{ position: 'relative', maxWidth: 800 }}
-          >
-            <StyledPanel>
-              <PanelHeader color="white" bg="dimgray">
-                <Flex align="center">
-                  <Text fontSize={4}>Results</Text>
-                </Flex>
-              </PanelHeader>
-              <div className="chart" style={{ height: 620 }} />
-            </StyledPanel>
+          <Box width={1 / 2} mx={2}>
+            <div className="chart" />
           </Box>
         </Flex>
       </div>

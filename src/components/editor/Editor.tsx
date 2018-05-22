@@ -1,8 +1,10 @@
 import React from 'react';
 import MonacoEditor from 'react-monaco-editor';
+import { BoxDimensions } from '../../types/commonTypes';
 
 interface Props {
   contents: string;
+  dimensions: BoxDimensions;
   language: string;
   onEditorChange: (newValue: any, event: any) => void;
   onSaveKeysPressed: () => void;
@@ -40,7 +42,7 @@ class Editor extends React.Component<Props> {
   };
 
   render() {
-    const { contents, language, onEditorChange } = this.props;
+    const { contents, dimensions, language, onEditorChange } = this.props;
 
     const options = {
       selectOnLineNumbers: true,
@@ -58,8 +60,8 @@ class Editor extends React.Component<Props> {
 
     return (
       <MonacoEditor
-        width={796}
-        height={720}
+        width={dimensions.width}
+        height={dimensions.height}
         language={language}
         theme="vs"
         value={contents}

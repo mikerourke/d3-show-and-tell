@@ -1,7 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
 import { Tabs } from 'rebass';
-import LineChart from './components/LineChart';
 import ChartTab from './components/ChartTab';
 import { CHART_NAMES } from '../../constants';
 import ShowIf from '../../components/showIf/ShowIf';
@@ -47,9 +46,7 @@ class Charts extends React.Component<{}, State> {
             />
           ))}
         </StyledTabs>
-        <ShowIf isShown={activeTab === 0}>
-          <LineChart />
-        </ShowIf>
+        <ShowIf isShown={activeTab === 0} />
       </StyledWrapper>
     );
   }

@@ -1,4 +1,4 @@
-export default `var margin = { top: 10, right: 20, bottom: 30, left: 30 };
+const stocksChart = `var margin = { top: 10, right: 20, bottom: 30, left: 30 };
 var width = 800 - margin.left - margin.right;
 var height = 770 - margin.top - margin.bottom;
 
@@ -63,3 +63,7 @@ svg
   .attr('stroke-width', 2)
   .attr('fill', 'none');
 `;
+
+export default {
+  stocksChart,
+};
