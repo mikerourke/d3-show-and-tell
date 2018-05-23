@@ -526,6 +526,7 @@ export interface TextProps extends BaseProps<TextClass> {
   small?: boolean;
   bold?: boolean;
   fontSize: number;
+  fontFamily?: string;
 }
 type TextClass = React.StatelessComponent<TextProps>;
 export declare const Text: TextClass;

@@ -7,6 +7,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
 const ModuleScopePlugin = require('react-dev-utils/ModuleScopePlugin');
 const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 const getClientEnvironment = require('./env');
 const paths = require('./paths');
 const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
@@ -123,6 +124,12 @@ module.exports = {
         loader: require.resolve('source-map-loader'),
         enforce: 'pre',
         include: paths.appSrc,
+        exclude: path.resolve(
+          paths.appSrc,
+          'utils',
+          'monaco',
+          'syntaxHighlighter.js',
+        ),
       },
       {
         // "oneOf" will traverse all following loaders until one will
@@ -209,6 +216,24 @@ module.exports = {
     ],
   },
   plugins: [
+    new CopyWebpackPlugin([
+      {
+        from: 'node_modules/babel-standalone/babel.min.js',
+        to: 'public/lib/babel.min.js',
+      },
+      {
+        from: 'node_modules/d3/dist/d3.min.js',
+        to: 'public/lib/d3.min.js',
+      },
+      {
+        from: 'node_modules/react/umd/react.production.min.js',
+        to: 'public/lib/react.production.min.js',
+      },
+      {
+        from: 'node_modules/react-dom/umd/react-dom.production.min.js',
+        to: 'public/lib/react-dom.production.min.js',
+      },
+    ]),
     // Generates an `index.html` file with the <script> injected.
     new HtmlWebpackPlugin({
       inject: true,

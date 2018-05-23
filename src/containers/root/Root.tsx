@@ -3,7 +3,7 @@ import { Provider } from 'rebass';
 import { injectGlobal } from 'styled-components';
 
 injectGlobal`
-  @import url('https://fonts.googleapis.com/css?family=Quicksand|Roboto+Mono');
+  @import url('https://fonts.googleapis.com/css?family=Roboto:300,400,700|Roboto+Mono');
   
   body {
     height: 100vh;
@@ -15,9 +15,8 @@ injectGlobal`
 const Root = ({ children }) => (
   <Provider
     theme={{
-      fonts: {
-        sans: '"Quicksand", Helvetica, sans-serif',
-      },
+      font: '"Roboto", Helvetica, sans-serif',
+      monospace: '"Hack"',
     }}
   >
     <div>{children}</div>

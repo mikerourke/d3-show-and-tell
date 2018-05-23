@@ -1,1 +1,5 @@
-export const CHART_NAMES = ['Line Chart', 'Pie Chart', 'Bar Chart', 'Random'];
+export const elementHeights = {
+  APP_HEADER: 48,
+  COLUMN_HEADER: 32,
+  EDITOR_TABS: 32,
+};
