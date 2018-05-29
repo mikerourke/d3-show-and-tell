@@ -1,8 +1,8 @@
 import { Dispatch } from 'redux';
 import { createAction } from 'redux-actions';
+import { getValidContent } from '@utils/codeUtils';
+import { ContentType } from '@customTypes/contentTypes';
 import { selectActiveEditorTab } from './contentSelectors';
-import { getValidContent } from '../../utils/codeUtils';
-import { ContentType } from '../../types/contentTypes';
 import { GetState } from '../reducers';
 
 export const codeFileFetchStarted = createAction(
@@ -64,7 +64,7 @@ const performFetchByContentType = (
 };
 
 export const fetchCodeFile = (fileName: string) => (
-  dispatch: Dispatch<any, any>,
+  dispatch: Dispatch<any>,
 ) => {
   dispatch(codeFileFetchStarted());
   return performFetchByContentType(ContentType.Code, fileName)
@@ -73,7 +73,7 @@ export const fetchCodeFile = (fileName: string) => (
 };
 
 export const fetchDataFile = (fileName: string) => (
-  dispatch: Dispatch<any, any>,
+  dispatch: Dispatch<any>,
 ) => {
   dispatch(dataFileFetchStarted());
   return performFetchByContentType(ContentType.Data, fileName)
@@ -82,7 +82,7 @@ export const fetchDataFile = (fileName: string) => (
 };
 
 export const fetchAllContent = (fileName: string) => (
-  dispatch: Dispatch<any, any>,
+  dispatch: Dispatch<any>,
 ) => {
   dispatch(allContentFetchStarted());
   return Promise.all([
@@ -94,17 +94,17 @@ export const fetchAllContent = (fileName: string) => (
 };
 
 export const updateCurrentContent = (newValue: string) => (
-  dispatch: Dispatch<any, any>,
+  dispatch: Dispatch<any>,
   getState: GetState,
 ) => {
   const activeEditorTab = selectActiveEditorTab(getState());
-  const validContent = getValidContent(activeEditorTab, newValue);
 
   if (activeEditorTab === ContentType.Code) {
     return dispatch(updateCurrentCode(newValue));
   }
 
   if (activeEditorTab === ContentType.Data) {
+    const validContent = getValidContent(activeEditorTab, newValue);
     return dispatch(updateCurrentData(validContent));
   }
 

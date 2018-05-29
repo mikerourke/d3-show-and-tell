@@ -1,5 +1,4 @@
 import React from 'react';
-import { BoxDimensions } from '../../types/commonTypes';
 
 interface Margins {
   top: number;
@@ -9,28 +8,68 @@ interface Margins {
 }
 
 interface Props {
+  width: number;
+  height: number;
   margins: Margins;
-  view: BoxDimensions;
   children: any;
 }
 
-const ScalingSurface: React.SFC<Props> = ({ margins, view, children }) => {
-  const { left, right, bottom, top } = margins;
-  const { height, width } = view;
+interface State {
+  width: number;
+  height: number;
+}
 
-  const totalHeight = height + bottom + top;
-  const totalWidth = width + left + right;
+export default class ScalingSurface extends React.Component<Props, State> {
+  ref: any;
+  aspect: any;
 
-  return (
-    <svg
-      width={totalWidth}
-      height="100%"
-      viewBox={`0 0 ${totalWidth} ${totalHeight}`}
-      preserveAspectRatio="xMidYMid"
-    >
-      <g transform={`translate(${left}, ${top})`}>{children}</g>
-    </svg>
-  );
-};
+  constructor(props: Props) {
+    super(props);
+    const { width, height } = this.props;
+    this.aspect = width / height;
+    this.state = {
+      width,
+      height,
+    };
+  }
 
-export default ScalingSurface;
+  componentDidMount() {
+    window.addEventListener('resize', this.resize);
+    this.resize();
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener('resize', this.resize);
+  }
+
+  resize = () => {
+    const widthInPixels = window
+      .getComputedStyle(this.ref.parentNode, null)
+      .getPropertyValue('width');
+    const width = parseInt(widthInPixels, 10);
+    const height = Math.round(width / this.aspect);
+    this.setState({ width, height });
+  };
+
+  handleRef = element => (this.ref = element);
+
+  render() {
+    const { left, right, top, bottom } = this.props.margins;
+    const fullHeight = this.props.height + top + bottom;
+    const fullWidth = this.props.width + left + right;
+
+    return (
+      <div style={{ maxWidth: 1000 }}>
+        <svg
+          width={this.state.width}
+          height={this.state.height}
+          viewBox={`0 0 ${fullWidth} ${fullHeight}`}
+          preserveAspectRatio="xMinYMid"
+          ref={this.handleRef}
+        >
+          <g transform={`translate(${left}, ${top})`}>{this.props.children}</g>
+        </svg>
+      </div>
+    );
+  }
+}

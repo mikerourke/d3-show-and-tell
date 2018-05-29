@@ -101,6 +101,12 @@ module.exports = {
       // Support React Native Web
       // https://www.smashingmagazine.com/2016/08/a-glimpse-into-the-future-with-react-native-for-web/
       'react-native': 'react-native-web',
+      '@components': path.resolve(__dirname, '..', 'src', 'components'),
+      '@containers': path.resolve(__dirname, '..', 'src', 'containers'),
+      '@redux': path.resolve(__dirname, '..', 'src', 'redux'),
+      '@customTypes': path.resolve(__dirname, '..', 'src', 'types'),
+      '@utils': path.resolve(__dirname, '..', 'src', 'utils'),
+      '@constants': path.resolve(__dirname, '..', 'src', 'constants', 'index.js'),
     },
     plugins: [
       // Prevents users from importing files from outside of src/ (or node_modules/).
@@ -224,14 +230,6 @@ module.exports = {
       {
         from: 'node_modules/d3/dist/d3.min.js',
         to: 'public/lib/d3.min.js',
-      },
-      {
-        from: 'node_modules/react/umd/react.production.min.js',
-        to: 'public/lib/react.production.min.js',
-      },
-      {
-        from: 'node_modules/react-dom/umd/react-dom.production.min.js',
-        to: 'public/lib/react-dom.production.min.js',
       },
     ]),
     // Generates an `index.html` file with the <script> injected.

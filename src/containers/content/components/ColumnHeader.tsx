@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 import { Flex, Text } from 'rebass';
-import { elementHeights } from '../../../constants';
+import { elementHeights } from '@constants';
 
 interface Props {
   children: string;

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Heading, Toolbar } from 'rebass';
 import styled from 'styled-components';
-import { elementHeights } from '../../../constants';
+import { elementHeights } from '@constants';
 
 const Header: React.SFC<{}> = () => {
   const StyledToolbar = styled(Toolbar)`

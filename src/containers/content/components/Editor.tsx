@@ -1,15 +1,17 @@
 import React from 'react';
 import MonacoEditor from 'react-monaco-editor';
 import { injectGlobal } from 'styled-components';
-import { elementHeights } from '../../constants';
-import { BoxDimensions } from '../../types/commonTypes';
-import { EditorContents } from '../../types/contentTypes';
+import { elementHeights } from '@constants';
+import { BoxDimensions } from '@customTypes/commonTypes';
+import { ContentType, EditorContents } from '@customTypes/contentTypes';
+import { configureMonaco, addEditorActions } from '@utils/editorUtils';
 
 interface Props {
   contents: EditorContents;
+  onEditorDidMount: (editor: any) => void;
   onEditorChange: (newValue: any, event: any) => void;
-  onSaveKeysPressed: () => void;
-  onUpdateTabUpdateKeysPressed: (tabIndex: number) => void;
+  onSaveKeysPressed: (editor: any) => void;
+  onUpdateTabKeysPressed: (tabIndex: number) => void;
 }
 
 interface State {
@@ -24,6 +26,10 @@ const getScreenDimensions = (): BoxDimensions => ({
 });
 
 injectGlobal`
+  .react-monaco-editor-container {
+    width: auto !important;
+  }
+  
   .monaco-editor {
     border: 2px solid #7fbbe3;
     max-height: ${MAX_HEIGHT}px;
@@ -48,36 +54,14 @@ class Editor extends React.Component<Props, State> {
     this.setState({ windowDimensions: getScreenDimensions() });
   };
 
-  editorDidMount = (editor: any, monaco: any) => {
-    const { onSaveKeysPressed, onUpdateTabUpdateKeysPressed } = this.props;
+  editorWillMount = (monaco: any) => {
+    configureMonaco(monaco);
+  };
 
-    editor.addAction({
-      id: 'save-and-update',
-      label: 'Save and Update',
-      keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S],
-      run: onSaveKeysPressed,
-    });
-    editor.addAction({
-      id: 'view-code-content',
-      label: 'View Code',
-      keybindings: [monaco.KeyMod.Alt | monaco.KeyCode.KEY_0],
-      run: () => onUpdateTabUpdateKeysPressed(0),
-    });
-    editor.addAction({
-      id: 'view-data-content',
-      label: 'View Data',
-      keybindings: [monaco.KeyMod.Alt | monaco.KeyCode.KEY_1],
-      run: () => onUpdateTabUpdateKeysPressed(1),
-    });
-    editor.addAction({
-      id: 'delete-this-line',
-      label: 'Delete Line',
-      keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_D],
-      run(thisEditor: any) {
-        thisEditor.trigger('keyboard', 'editor.action.deleteLines');
-        return null;
-      },
-    });
+  editorDidMount = (editor: any, monaco: any) => {
+    this.props.onEditorDidMount(editor);
+    addEditorActions(editor, monaco, this.props);
+    editor.getModel().updateOptions({ tabSize: 2 });
     editor.focus();
   };
 
@@ -120,6 +104,7 @@ class Editor extends React.Component<Props, State> {
         options={options}
         onChange={onEditorChange}
         editorDidMount={this.editorDidMount}
+        editorWillMount={this.editorWillMount}
       />
     );
   }

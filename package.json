@@ -27,12 +27,14 @@
     "react-router": "^4.2.0",
     "react-router-dom": "^4.2.2",
     "rebass": "^1.0.7",
-    "redux": "^4.0.0",
+    "redux": "^3.7.2",
     "redux-actions": "^2.3.2",
     "redux-thunk": "^2.2.0",
-    "reselect": "^3.0.1"
+    "reselect": "^3.0.1",
+    "store": "^2.0.12"
   },
   "devDependencies": {
+    "@types/babylon": "^6.16.2",
     "@types/classnames": "^2.2.3",
     "@types/d3": "^5.0.0",
     "@types/jest": "^22.2.3",

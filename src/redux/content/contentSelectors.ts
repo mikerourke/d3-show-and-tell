@@ -3,7 +3,7 @@ import get from 'lodash/get';
 import isNil from 'lodash/isNil';
 import isString from 'lodash/isString';
 import { State } from '../reducers';
-import { ContentType, EditorContents } from '../../types/contentTypes';
+import { ContentType, EditorContents } from '@customTypes/contentTypes';
 
 export const selectCurrentCode = (state: State) => state.content.currentCode;
 

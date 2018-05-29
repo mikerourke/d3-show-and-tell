@@ -1,15 +1,13 @@
 import * as babel from 'babel-standalone';
 import * as babylon from 'babylon';
 import isNil from 'lodash/isNil';
-import { ContentModel, ContentType } from '../types/contentTypes';
+import { ContentType } from '@customTypes/contentTypes';
 
 // language=JavaScript
 const responsivefyFunction = `
   function responsivefy(svg) {
     // Get container + svg aspect ratio:
     var container = d3.select(svg.node().parentNode);
-    // console.log(svg.style('width'));
-    // return;
     var width = parseInt(svg.style('width')) || 1;
     var height = parseInt(svg.style('height')) || 1;
     var aspect = width / height;
@@ -40,18 +38,30 @@ const responsivefyFunction = `
 // language=JavaScript
 const renderFunction = `
   function render(component) {
-    ReactDOM.render(component, document.getElementById('contents'));
+    try {
+      ReactDOM.render(component, document.getElementById('contents'));
+    } catch (error) {
+      console.log(error);
+    }
   }
 `;
+
+export const getTransformedCode = (codeString: string) => {
+  const transformedCode = babel.transform(codeString, {
+    plugins: ['transform-react-jsx', 'transform-object-rest-spread'],
+    presets: ['es2015'],
+  });
+  return transformedCode.code;
+};
 
 export const functionStrings = {
   responsivefy: responsivefyFunction,
   render: renderFunction,
 };
 
-const validateCode = (codeString: string) => {
+export const validateCode = (codeString: string) => {
   try {
-    const options = {
+    const options: any = {
       sourceType: 'script',
       plugins: ['jsx', 'objectRestSpread', 'classProperties'],
     };
@@ -69,14 +79,6 @@ const validateJson = (jsonString: string) => {
   } catch (error) {
     return false;
   }
-};
-
-export const getTransformedCode = (codeString: string) => {
-  const transformedCode = babel.transform(codeString, {
-    plugins: ['transform-react-jsx', 'transform-object-rest-spread'],
-    presets: ['es2015'],
-  });
-  return transformedCode.code;
 };
 
 export const getValidContent = (

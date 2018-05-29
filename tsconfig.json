@@ -26,14 +26,18 @@
     "suppressImplicitAnyIndexErrors": true,
     "target": "es5",
     "typeRoots": [
-      "./typings",
+      "./definitions",
       "./node_modules/@types"
     ],
     "baseUrl": ".",
     "paths": {
-      "*": [
-        "./typings/*"
-      ]
+      "*": ["./definitions/*"],
+      "@components/*": ["./src/components/*"],
+      "@containers/*": ["./src/containers/*"],
+      "@redux/*": ["./src/redux/*"],
+      "@customTypes/*": ["./src/types/*"],
+      "@utils/*": ["./src/utils/*"],
+      "@constants": ["./src/constants/index.ts"]
     }
   },
   "exclude": [
