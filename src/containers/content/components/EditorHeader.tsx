@@ -43,18 +43,20 @@ const EditorHeader: React.SFC<Props> = ({
     <Flex>
       <Box width={1 / 2}>
         <StyledTabs mt={2} mb={8}>
-          {['Code', 'Data'].map((tabName: string, tabIndex: number) => (
-            <StyledTab
-              key={tabName}
-              mr={8}
-              pt={0}
-              pb={0}
-              className={classnames({ isActive: tabIndex === activeTab })}
-              onClick={() => onTabClick(tabIndex)}
-            >
-              View {tabName}
-            </StyledTab>
-          ))}
+          {['Code', 'Data', 'Paths'].map(
+            (tabName: string, tabIndex: number) => (
+              <StyledTab
+                key={tabName}
+                mr={8}
+                pt={0}
+                pb={0}
+                className={classnames({ isActive: tabIndex === activeTab })}
+                onClick={() => onTabClick(tabIndex)}
+              >
+                View {tabName}
+              </StyledTab>
+            ),
+          )}
         </StyledTabs>
       </Box>
       <Box width={1 / 2}>

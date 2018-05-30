@@ -28,7 +28,7 @@ const IconButton: React.SFC<Props> = ({ iconName, onClick, ...rest }) => {
       onClick={onClick}
       {...rest}
     >
-      <path d={iconPaths[iconName]} />
+      <path d={iconPaths[iconName]} className="iconButton" />
     </StyledSvg>
   );
 };

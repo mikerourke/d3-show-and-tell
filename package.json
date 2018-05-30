@@ -31,7 +31,8 @@
     "redux-actions": "^2.3.2",
     "redux-thunk": "^2.2.0",
     "reselect": "^3.0.1",
-    "store": "^2.0.12"
+    "store": "^2.0.12",
+    "svg-path-parser": "^1.1.0"
   },
   "devDependencies": {
     "@types/babylon": "^6.16.2",

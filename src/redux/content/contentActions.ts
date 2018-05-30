@@ -43,6 +43,10 @@ export const updateCurrentData = createAction(
   '@content/UPDATE_CURRENT_DATA',
   (data: string | object) => data,
 );
+export const updateCurrentPaths = createAction(
+  '@content/UPDATE_CURRENT_PATHS',
+  (paths: string) => paths,
+);
 export const updateActiveEditorTab = createAction(
   '@content/UPDATE_ACTIVE_EDITOR_TAB',
   (contentType: ContentType) => contentType,
@@ -106,6 +110,10 @@ export const updateCurrentContent = (newValue: string) => (
   if (activeEditorTab === ContentType.Data) {
     const validContent = getValidContent(activeEditorTab, newValue);
     return dispatch(updateCurrentData(validContent));
+  }
+
+  if (activeEditorTab === ContentType.Paths) {
+    return dispatch(updateCurrentPaths(newValue));
   }
 
   return Promise.resolve();

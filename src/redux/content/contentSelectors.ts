@@ -7,6 +7,8 @@ import { ContentType, EditorContents } from '@customTypes/contentTypes';
 
 export const selectCurrentCode = (state: State) => state.content.currentCode;
 
+export const selectCurrentPaths = (state: State) => state.content.currentPaths;
+
 export const selectCurrentData = (state: State) => {
   const currentData = get(state, ['content', 'currentData'], null);
   if (isNil(currentData)) return '';
@@ -29,16 +31,17 @@ export const selectIsLoading = createSelector(
 );
 
 export const selectAllContent = createSelector(
-  [selectCurrentCode, selectCurrentData],
-  (currentCode, currentData) => ({
+  [selectCurrentCode, selectCurrentData, selectCurrentPaths],
+  (currentCode, currentData, currentPaths) => ({
     code: currentCode,
     data: currentData,
+    paths: currentPaths,
   }),
 );
 
 export const selectEditorContents = createSelector(
   [selectAllContent, selectActiveEditorTab],
-  ({ code, data }, activeEditorTab): EditorContents =>
+  ({ code, data, paths }, activeEditorTab): EditorContents =>
     ({
       [ContentType.Code]: {
         language: 'javascript' as any,
@@ -47,6 +50,10 @@ export const selectEditorContents = createSelector(
       [ContentType.Data]: {
         language: 'json' as any,
         value: data,
+      },
+      [ContentType.Paths]: {
+        language: 'javascript' as any,
+        value: paths,
       },
     }[activeEditorTab]),
 );

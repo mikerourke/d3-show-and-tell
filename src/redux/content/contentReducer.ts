@@ -11,6 +11,7 @@ import {
   dataFileFetchStarted,
   updateCurrentCode,
   updateCurrentData,
+  updateCurrentPaths,
   updateActiveEditorTab,
 } from './contentActions';
 import { ContentType } from '../../types/contentTypes';
@@ -18,6 +19,7 @@ import { ContentType } from '../../types/contentTypes';
 export interface ContentState {
   readonly currentCode: string;
   readonly currentData: string | object;
+  readonly currentPaths: string;
   readonly activeEditorTab: ContentType;
   readonly isLoading: boolean;
 }
@@ -25,6 +27,7 @@ export interface ContentState {
 export const initialState: ContentState = {
   currentCode: '',
   currentData: '',
+  currentPaths: '',
   activeEditorTab: ContentType.Code,
   isLoading: false,
 };
@@ -70,6 +73,14 @@ const contentReducer = handleActions(
     ) => ({
       ...state,
       currentData,
+    }),
+
+    [updateCurrentPaths.toString()]: (
+      state: ContentState,
+      { payload: currentPaths }: any,
+    ) => ({
+      ...state,
+      currentPaths,
     }),
 
     [updateActiveEditorTab.toString()]: (

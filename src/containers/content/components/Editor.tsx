@@ -3,7 +3,7 @@ import MonacoEditor from 'react-monaco-editor';
 import { injectGlobal } from 'styled-components';
 import { elementHeights } from '@constants';
 import { BoxDimensions } from '@customTypes/commonTypes';
-import { ContentType, EditorContents } from '@customTypes/contentTypes';
+import { EditorContents } from '@customTypes/contentTypes';
 import { configureMonaco, addEditorActions } from '@utils/editorUtils';
 
 interface Props {
@@ -83,7 +83,7 @@ class Editor extends React.Component<Props, State> {
     const options = {
       selectOnLineNumbers: true,
       fontFamily: '"Roboto Mono"',
-      fontSize: 15,
+      fontSize: 14,
       lineHeight: 26,
       fontLigatures: true,
       fontWeight: '300' as any,

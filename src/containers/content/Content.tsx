@@ -13,6 +13,7 @@ import {
   fetchAllContent,
   updateActiveEditorTab,
   updateCurrentContent,
+  updateCurrentPaths,
 } from '@redux/content/contentActions';
 import {
   selectActiveEditorTab,
@@ -30,6 +31,10 @@ import Editor from './components/Editor';
 import EditorHeader from './components/EditorHeader';
 import ColumnHeader from './components/ColumnHeader';
 import { loadCursorPosition, saveCursorPosition } from '@utils/editorUtils';
+import {
+  getPathComponentsFromContents,
+  updatePathsFromChanges,
+} from '@utils/svgPathUtils';
 
 interface Props {
   activeEditorTab: ContentType;
@@ -39,6 +44,7 @@ interface Props {
   onFetchAllContent: (fileName: string) => Promise<any>;
   onUpdateActiveEditorTab: (contentType: ContentType) => void;
   onUpdateCurrentContent: (newValue: string) => void;
+  onUpdateCurrentPaths: (newValue: string) => void;
 }
 
 interface State {
@@ -63,6 +69,13 @@ export class ContentComponent extends React.Component<Props, State> {
     this.props.onFetchAllContent('stockCharts').then(() => {
       this.updateScriptContents();
     });
+  }
+
+  componentDidMount() {
+    setTimeout(() => {
+      const pathsValue = getPathComponentsFromContents();
+      this.props.onUpdateCurrentPaths(pathsValue);
+    }, 1000);
   }
 
   componentDidUpdate() {
@@ -96,8 +109,18 @@ export class ContentComponent extends React.Component<Props, State> {
   };
 
   handleActiveEditorTabChange = (tabIndex: number) => {
-    saveCursorPosition(this.state.editor, tabIndex);
+    saveCursorPosition(this.state.editor, this.props.activeEditorTab);
     this.props.onUpdateActiveEditorTab(tabIndex);
+  };
+
+  handleSaveAction = () => {
+    if (this.props.activeEditorTab === ContentType.Paths) {
+      const editorValue = this.state.editor.getValue();
+      updatePathsFromChanges(editorValue);
+      this.props.onUpdateCurrentPaths(editorValue);
+    } else {
+      this.updateScriptContents();
+    }
   };
 
   render() {
@@ -113,14 +136,14 @@ export class ContentComponent extends React.Component<Props, State> {
               activeTab={this.props.activeEditorTab}
               onFormatClick={this.handleFormatButtonClick}
               onRefreshClick={() => {}}
-              onSaveClick={this.updateScriptContents}
+              onSaveClick={this.handleSaveAction}
               onTabClick={this.handleActiveEditorTabChange}
             />
             <Editor
               contents={this.props.editorContents}
               onEditorDidMount={this.handleEditorDidMount}
               onEditorChange={this.props.onUpdateCurrentContent}
-              onSaveKeysPressed={this.updateScriptContents}
+              onSaveKeysPressed={this.handleSaveAction}
               onUpdateTabKeysPressed={this.handleActiveEditorTabChange}
             />
           </Box>
@@ -147,5 +170,6 @@ export default connect(
       dispatch(updateActiveEditorTab(contentType)),
     onUpdateCurrentContent: newValue =>
       dispatch(updateCurrentContent(newValue)),
+    onUpdateCurrentPaths: newValue => dispatch(updateCurrentPaths(newValue)),
   }),
 )(ContentComponent);

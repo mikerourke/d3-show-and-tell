@@ -70,11 +70,7 @@ const getStorageKeyByContentType = (contentType: ContentType) =>
     [ContentType.Data]: 'dataLinePosition',
   }[contentType]);
 
-export const saveCursorPosition = (
-  editor: any,
-  activeEditorTab: ContentType,
-) => {
-  const previousTab = activeEditorTab === ContentType.Code ? 1 : 0;
+export const saveCursorPosition = (editor: any, previousTab: ContentType) => {
   const { lineNumber, column } = editor.getPosition();
   const storageKey = getStorageKeyByContentType(previousTab);
   store.set(storageKey, { lineNumber, column });

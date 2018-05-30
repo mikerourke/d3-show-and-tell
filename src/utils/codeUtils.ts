@@ -93,7 +93,8 @@ export const getValidContent = (
     const stringifiedContent = JSON.stringify(content);
     return JSON.parse(stringifiedContent);
   }
-  return '';
+
+  return content;
 };
 
 export const appendScriptToPage = (identifier: string, content: string) => {
