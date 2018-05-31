@@ -54,6 +54,13 @@ export const addEditorActions = (editor: any, monaco: any, runActions: any) => {
   });
 
   editor.addAction({
+    id: 'view-paths-content',
+    label: 'View Paths',
+    keybindings: [monaco.KeyMod.Alt | monaco.KeyCode.KEY_3],
+    run: () => onUpdateTabKeysPressed(ContentType.Paths),
+  });
+
+  editor.addAction({
     id: 'delete-this-line',
     label: 'Delete Line',
     keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_D],

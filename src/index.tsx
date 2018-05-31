@@ -6,6 +6,8 @@ import configureStore from '@redux/configureStore';
 import Root from './containers/root/Root';
 import App from './containers/app/App';
 import 'animate.css/animate.min.css';
+import 'bulma/css/bulma.min.css';
+import './styles.css';
 
 const store = configureStore();
 

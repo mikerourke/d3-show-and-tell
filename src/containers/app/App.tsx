@@ -1,22 +1,12 @@
 import React from 'react';
-import { Box, Flex } from 'rebass';
-import styled from 'styled-components';
 import Content from '../content/Content';
-import Header from './components/Header';
+import Navigation from './components/Navigation';
 
-class App extends React.Component<{}> {
-  render() {
-    const StyledWrapper = styled.div`
-      height: 100%;
-    `;
-
-    return (
-      <StyledWrapper>
-        <Header />
-        <Content />
-      </StyledWrapper>
-    );
-  }
-}
+const App: React.SFC<{}> = () => (
+  <div style={{ height: '100%' }}>
+    <Navigation />
+    <Content />
+  </div>
+);
 
 export default App;

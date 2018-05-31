@@ -1,6 +1,5 @@
 import React from 'react';
 import MonacoEditor from 'react-monaco-editor';
-import { injectGlobal } from 'styled-components';
 import { elementHeights } from '@constants';
 import { BoxDimensions } from '@customTypes/commonTypes';
 import { EditorContents } from '@customTypes/contentTypes';
@@ -24,18 +23,6 @@ const getScreenDimensions = (): BoxDimensions => ({
   height: window.innerHeight,
   width: window.innerWidth,
 });
-
-injectGlobal`
-  .react-monaco-editor-container {
-    width: auto !important;
-  }
-  
-  .monaco-editor {
-    border: 2px solid #7fbbe3;
-    max-height: ${MAX_HEIGHT}px;
-    padding: 4px;
-  }
-`;
 
 class Editor extends React.Component<Props, State> {
   state = {

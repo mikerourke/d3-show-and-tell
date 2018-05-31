@@ -11,7 +11,16 @@ const getNumericValue = (value: string | number) => {
   return +value;
 };
 
-const getPathNodes = () => document.querySelectorAll('path:not(.iconButton)');
+const getPathNodes = () => {
+  const pathNodes: any = document.querySelectorAll('path');
+  const validNodes = [];
+  for (const pathNode of pathNodes) {
+    if (!pathNode.parentNode.dataset.prefix) {
+      validNodes.push(pathNode);
+    }
+  }
+  return validNodes;
+};
 
 class SvgPathPrettifier {
   axis: string;
@@ -209,9 +218,8 @@ class SvgPathUglifier {
     const pathNodes: any = getPathNodes();
     this.pathBlocks.forEach((pathBlock, index) => {
       const cleanBlock = this.cleanupPathBlock(pathBlock);
-      console.log(cleanBlock);
       const newPath = this.buildPathForPathBlock(cleanBlock);
-      const pathNode = pathNodes.item(index);
+      const pathNode = pathNodes[index];
       if (pathNode) pathNode.setAttribute('d', newPath);
     });
   }
@@ -219,11 +227,10 @@ class SvgPathUglifier {
 
 export const getPathComponentsFromContents = () => {
   const pathNodes: any = getPathNodes();
-  const componentStrings = [];
   const svgPrettifier = new SvgPathPrettifier();
-  for (const pathNode of pathNodes) {
-    componentStrings.push(svgPrettifier.buildPrettySvgPath(pathNode));
-  }
+  const componentStrings = pathNodes.map(pathNode =>
+    svgPrettifier.buildPrettySvgPath(pathNode),
+  );
   const pathBlocks = componentStrings.join('\n');
   return ['<Paths>', pathBlocks, '</Paths>'].join('\n');
 };

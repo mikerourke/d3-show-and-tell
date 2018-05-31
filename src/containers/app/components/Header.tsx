@@ -1,19 +1,36 @@
 import React from 'react';
-import { Heading, Toolbar } from 'rebass';
-import styled from 'styled-components';
-import { elementHeights } from '@constants';
+import { Navbar, NavbarBrand, NavbarItem, Title } from 'bloomer';
+import { css } from 'emotion';
+import FontIcon from '@components/fontIcon/FontIcon';
 
-const Header: React.SFC<{}> = () => {
-  const StyledToolbar = styled(Toolbar)`
-    height: ${elementHeights.APP_HEADER}px;
+interface Props {
+  onToggleSidebar: () => void;
+}
+
+const Header: React.SFC<Props> = ({ onToggleSidebar }) => {
+  const iconStyle = css`
+    cursor: pointer;
+
+    &:hover {
+      opacity: 0.5;
+    }
   `;
 
   return (
-    <StyledToolbar p={2}>
-      <Heading is="h2" ml={2}>
-        D3 SHOW AND TELL
-      </Heading>
-    </StyledToolbar>
+    <Navbar
+      className={css`
+        background: transparent;
+      `}
+    >
+      <NavbarBrand>
+        <NavbarItem onClick={onToggleSidebar}>
+          <FontIcon isSize="medium" className={iconStyle} iconName="bars" />
+        </NavbarItem>
+        <NavbarItem>
+          <Title isSize={3}>D3 Show and Tell</Title>
+        </NavbarItem>
+      </NavbarBrand>
+    </Navbar>
   );
 };
 

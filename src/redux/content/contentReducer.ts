@@ -1,14 +1,6 @@
-import { handleActions, combineActions } from 'redux-actions';
+import { handleActions } from 'redux-actions';
 import {
-  allContentFetchFailure,
-  allContentFetchSuccess,
-  allContentFetchStarted,
-  codeFileFetchFailure,
-  codeFileFetchSuccess,
-  codeFileFetchStarted,
-  dataFileFetchFailure,
-  dataFileFetchSuccess,
-  dataFileFetchStarted,
+  allContentLoaded,
   updateCurrentCode,
   updateCurrentData,
   updateCurrentPaths,
@@ -21,7 +13,6 @@ export interface ContentState {
   readonly currentData: string | object;
   readonly currentPaths: string;
   readonly activeEditorTab: ContentType;
-  readonly isLoading: boolean;
 }
 
 export const initialState: ContentState = {
@@ -29,34 +20,18 @@ export const initialState: ContentState = {
   currentData: '',
   currentPaths: '',
   activeEditorTab: ContentType.Code,
-  isLoading: false,
 };
 
 const contentReducer = handleActions(
   {
-    [allContentFetchSuccess.toString()]: (
+    [allContentLoaded.toString()]: (
       state: ContentState,
       { payload: { code, data } }: any,
     ) => ({
       ...state,
       currentCode: code,
-      currentData: data,
-    }),
-
-    [codeFileFetchSuccess.toString()]: (
-      state: ContentState,
-      { payload: currentCode }: any,
-    ) => ({
-      ...state,
-      currentCode,
-    }),
-
-    [dataFileFetchSuccess.toString()]: (
-      state: ContentState,
-      { payload: currentData }: any,
-    ) => ({
-      ...state,
-      currentData,
+      currentData: JSON.stringify(data, null, '  '),
+      currentPaths: '',
     }),
 
     [updateCurrentCode.toString()]: (
@@ -89,27 +64,6 @@ const contentReducer = handleActions(
     ) => ({
       ...state,
       activeEditorTab: contentType,
-    }),
-
-    [combineActions(
-      allContentFetchStarted.toString(),
-      codeFileFetchStarted.toString(),
-      dataFileFetchStarted.toString(),
-    ) as any]: state => ({
-      ...state,
-      isLoading: true,
-    }),
-
-    [combineActions(
-      allContentFetchSuccess.toString(),
-      allContentFetchFailure.toString(),
-      codeFileFetchSuccess.toString(),
-      codeFileFetchFailure.toString(),
-      dataFileFetchSuccess.toString(),
-      dataFileFetchFailure.toString(),
-    ) as any]: state => ({
-      ...state,
-      isLoading: false,
     }),
   },
   initialState,

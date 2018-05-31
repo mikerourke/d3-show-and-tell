@@ -11,10 +11,9 @@
     ],
     "module": "esnext",
     "moduleResolution": "node",
-    "noImplicitAny": false,
     "noImplicitReturns": true,
     "noImplicitThis": false,
-    "noUnusedLocals": false,
+    "noUnusedLocals": true,
     "outDir": "build",
     "pretty": true,
     "rootDirs": [
@@ -22,8 +21,6 @@
       "config"
     ],
     "sourceMap": true,
-    "strictNullChecks": false,
-    "suppressImplicitAnyIndexErrors": true,
     "target": "es5",
     "typeRoots": [
       "./definitions",

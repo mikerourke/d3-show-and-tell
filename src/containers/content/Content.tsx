@@ -1,5 +1,6 @@
 import React from 'react';
-import { Box, Flex } from 'rebass';
+import { Columns, Column, Title } from 'bloomer';
+import { css } from 'emotion';
 import { connect } from 'react-redux';
 import isNil from 'lodash/isNil';
 import {
@@ -10,7 +11,7 @@ import {
   validateCode,
 } from '@utils/codeUtils';
 import {
-  fetchAllContent,
+  loadAllContentForSection,
   updateActiveEditorTab,
   updateCurrentContent,
   updateCurrentPaths,
@@ -19,7 +20,6 @@ import {
   selectActiveEditorTab,
   selectAllContent,
   selectEditorContents,
-  selectIsLoading,
 } from '@redux/content/contentSelectors';
 import { State as ReduxState } from '@redux/reducers';
 import {
@@ -29,7 +29,6 @@ import {
 } from '@customTypes/contentTypes';
 import Editor from './components/Editor';
 import EditorHeader from './components/EditorHeader';
-import ColumnHeader from './components/ColumnHeader';
 import { loadCursorPosition, saveCursorPosition } from '@utils/editorUtils';
 import {
   getPathComponentsFromContents,
@@ -40,8 +39,7 @@ interface Props {
   activeEditorTab: ContentType;
   editorContents: EditorContents;
   currentContent: ContentModel;
-  isLoading: boolean;
-  onFetchAllContent: (fileName: string) => Promise<any>;
+  onLoadAllContentForChapter: (chapterNumber: number) => void;
   onUpdateActiveEditorTab: (contentType: ContentType) => void;
   onUpdateCurrentContent: (newValue: string) => void;
   onUpdateCurrentPaths: (newValue: string) => void;
@@ -61,14 +59,14 @@ export class ContentComponent extends React.Component<Props, State> {
       editor: null,
     };
 
-    appendScriptToPage(
-      'shared-code',
-      Object.values(functionStrings).join('\n'),
-    );
-
-    this.props.onFetchAllContent('stockCharts').then(() => {
+    this.props.onLoadAllContentForChapter(1);
+    setTimeout(() => {
+      appendScriptToPage(
+        'shared-code',
+        Object.values(functionStrings).join('\n'),
+      );
       this.updateScriptContents();
-    });
+    }, 0);
   }
 
   componentDidMount() {
@@ -125,34 +123,34 @@ export class ContentComponent extends React.Component<Props, State> {
 
   render() {
     return (
-      <div>
-        <Flex
-          p={16}
-          justify="space-evenly"
-          style={{ height: 'calc(100% - 64px)' }}
-        >
-          <Box width={1 / 2} mx={2}>
-            <EditorHeader
-              activeTab={this.props.activeEditorTab}
-              onFormatClick={this.handleFormatButtonClick}
-              onRefreshClick={() => {}}
-              onSaveClick={this.handleSaveAction}
-              onTabClick={this.handleActiveEditorTabChange}
-            />
-            <Editor
-              contents={this.props.editorContents}
-              onEditorDidMount={this.handleEditorDidMount}
-              onEditorChange={this.props.onUpdateCurrentContent}
-              onSaveKeysPressed={this.handleSaveAction}
-              onUpdateTabKeysPressed={this.handleActiveEditorTabChange}
-            />
-          </Box>
-          <Box width={1 / 2} mx={2} px={4}>
-            <ColumnHeader>Imagination Station&trade;</ColumnHeader>
-            <div id="contents" className="chart" />
-          </Box>
-        </Flex>
-      </div>
+      <Columns
+        className={css`
+          margin: 8px;
+        `}
+      >
+        <Column>
+          <EditorHeader
+            activeTab={this.props.activeEditorTab}
+            onFormatClick={this.handleFormatButtonClick}
+            onRefreshClick={() => {}}
+            onSaveClick={this.handleSaveAction}
+            onTabClick={this.handleActiveEditorTabChange}
+          />
+          <Editor
+            contents={this.props.editorContents}
+            onEditorDidMount={this.handleEditorDidMount}
+            onEditorChange={this.props.onUpdateCurrentContent}
+            onSaveKeysPressed={this.handleSaveAction}
+            onUpdateTabKeysPressed={this.handleActiveEditorTabChange}
+          />
+        </Column>
+        <Column>
+          <Title isFullWidth hasTextAlign="centered" hasTextColor="dark">
+            Imagination Station&trade;
+          </Title>
+          <div id="contents" className="chart" />
+        </Column>
+      </Columns>
     );
   }
 }
@@ -162,10 +160,10 @@ export default connect(
     activeEditorTab: selectActiveEditorTab(state),
     editorContents: selectEditorContents(state),
     currentContent: selectAllContent(state),
-    isLoading: selectIsLoading(state),
   }),
   (dispatch: any) => ({
-    onFetchAllContent: fileName => dispatch(fetchAllContent(fileName)),
+    onLoadAllContentForChapter: chapterNumber =>
+      dispatch(loadAllContentForSection(chapterNumber)),
     onUpdateActiveEditorTab: contentType =>
       dispatch(updateActiveEditorTab(contentType)),
     onUpdateCurrentContent: newValue =>

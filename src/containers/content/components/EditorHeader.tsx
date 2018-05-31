@@ -1,9 +1,15 @@
 import React from 'react';
-import { Box, Flex, Tabs, TabItem } from 'rebass';
+import {
+  Button,
+  Navbar,
+  NavbarItem,
+  NavbarStart,
+  NavbarMenu,
+  NavbarEnd,
+} from 'bloomer';
 import classnames from 'classnames';
-import styled from 'styled-components';
-import { elementHeights } from '@constants';
-import IconButton from '@components/iconButton/IconButton';
+import { css } from 'emotion';
+import { ContentType } from '@customTypes/contentTypes';
 
 interface Props {
   activeTab: number;
@@ -20,53 +26,70 @@ const EditorHeader: React.SFC<Props> = ({
   onSaveClick,
   onTabClick,
 }) => {
-  const StyledTabs = styled(Tabs)`
-    border: unset;
-    height: ${elementHeights.EDITOR_TABS}px;
-    width: fit-content;
-
-    .isActive {
-      color: #7dbae5;
-      border-bottom: 3px solid #7dbae5;
-    }
+  const activeItemStyle = css`
+    border-bottom: 2px solid deepskyblue;
   `;
 
-  const StyledTab = styled(TabItem)`
-    cursor: pointer;
-    font-size: 16px;
-    text-align: center;
-    text-transform: uppercase;
-    width: 128px;
+  const renderNavbarItem = (title: string, contentType: ContentType) => (
+    <NavbarItem
+      onClick={() => onTabClick(contentType)}
+      href="#"
+      isActive={activeTab === contentType}
+      className={classnames({ [activeItemStyle]: activeTab === contentType })}
+    >
+      View {title}
+    </NavbarItem>
+  );
+
+  const buttonStyle = css`
+    margin-left: 4px;
   `;
 
   return (
-    <Flex>
-      <Box width={1 / 2}>
-        <StyledTabs mt={2} mb={8}>
-          {['Code', 'Data', 'Paths'].map(
-            (tabName: string, tabIndex: number) => (
-              <StyledTab
-                key={tabName}
-                mr={8}
-                pt={0}
-                pb={0}
-                className={classnames({ isActive: tabIndex === activeTab })}
-                onClick={() => onTabClick(tabIndex)}
-              >
-                View {tabName}
-              </StyledTab>
-            ),
-          )}
-        </StyledTabs>
-      </Box>
-      <Box width={1 / 2}>
-        <Flex justify="flex-end" align="center">
-          <IconButton iconName="save" onClick={onSaveClick} />
-          <IconButton iconName="edit" onClick={onFormatClick} />
-          <IconButton iconName="refresh" onClick={onRefreshClick} />
-        </Flex>
-      </Box>
-    </Flex>
+    <Navbar
+      className={css`
+        margin-bottom: 8px;
+        z-index: 0;
+      `}
+    >
+      <NavbarMenu>
+        <NavbarStart>
+          {renderNavbarItem('Code', ContentType.Code)}
+          {renderNavbarItem('Data', ContentType.Data)}
+          {renderNavbarItem('Paths', ContentType.Paths)}
+        </NavbarStart>
+        <NavbarEnd>
+          <NavbarItem>
+            <Button
+              isColor="dark"
+              isOutlined
+              isSize="small"
+              onClick={onSaveClick}
+            >
+              Save
+            </Button>
+            <Button
+              isColor="dark"
+              isOutlined
+              isSize="small"
+              className={buttonStyle}
+              onClick={onRefreshClick}
+            >
+              Reset
+            </Button>
+            <Button
+              isColor="dark"
+              isOutlined
+              isSize="small"
+              className={buttonStyle}
+              onClick={onFormatClick}
+            >
+              Format
+            </Button>
+          </NavbarItem>
+        </NavbarEnd>
+      </NavbarMenu>
+    </Navbar>
   );
 };
 

@@ -20,16 +20,6 @@ export const selectCurrentData = (state: State) => {
 export const selectActiveEditorTab = (state: State) =>
   state.content.activeEditorTab;
 
-export const selectIsLoading = createSelector(
-  [
-    (state: State) => state.content.isLoading,
-    selectCurrentCode,
-    selectCurrentData,
-  ],
-  (isLoading, currentCode, currentData) =>
-    isLoading || currentCode === '' || currentData === '',
-);
-
 export const selectAllContent = createSelector(
   [selectCurrentCode, selectCurrentData, selectCurrentPaths],
   (currentCode, currentData, currentPaths) => ({
