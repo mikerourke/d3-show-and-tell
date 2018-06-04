@@ -17,8 +17,7 @@
     "outDir": "build",
     "pretty": true,
     "rootDirs": [
-      "src",
-      "config"
+      "src"
     ],
     "sourceMap": true,
     "target": "es5",

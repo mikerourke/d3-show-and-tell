@@ -1,37 +1,35 @@
 import React from 'react';
 import { Navbar, NavbarBrand, NavbarItem, Title } from 'bloomer';
 import { css } from 'emotion';
-import FontIcon from '@components/fontIcon/FontIcon';
+import IconButton from '@components/iconButton/IconButton';
 
 interface Props {
   onToggleSidebar: () => void;
 }
 
-const Header: React.SFC<Props> = ({ onToggleSidebar }) => {
-  const iconStyle = css`
-    cursor: pointer;
-
-    &:hover {
-      opacity: 0.5;
-    }
-  `;
-
-  return (
-    <Navbar
-      className={css`
-        background: transparent;
-      `}
-    >
-      <NavbarBrand>
-        <NavbarItem onClick={onToggleSidebar}>
-          <FontIcon isSize="medium" className={iconStyle} iconName="bars" />
-        </NavbarItem>
-        <NavbarItem>
-          <Title isSize={3}>D3 Show and Tell</Title>
-        </NavbarItem>
-      </NavbarBrand>
-    </Navbar>
-  );
-};
+const Header: React.SFC<Props> = ({ onToggleSidebar }) => (
+  <Navbar
+    className={css`
+      background: transparent;
+      height: 4rem;
+    `}
+  >
+    <NavbarBrand>
+      <NavbarItem onClick={onToggleSidebar}>
+        <IconButton iconName="menu" color="var(--pandera-blue)" />
+      </NavbarItem>
+      <NavbarItem>
+        <Title
+          isSize={3}
+          className={css`
+            color: var(--pandera-blue);
+          `}
+        >
+          D3 Show and Tell
+        </Title>
+      </NavbarItem>
+    </NavbarBrand>
+  </Navbar>
+);
 
 export default Header;

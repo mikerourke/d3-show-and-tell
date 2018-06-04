@@ -1,9 +1,22 @@
 import { createSelector } from 'reselect';
 import get from 'lodash/get';
+import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
 import isString from 'lodash/isString';
 import { State } from '../reducers';
 import { ContentType, EditorContents } from '@customTypes/contentTypes';
+
+const selectDatasetsByName = createSelector(
+  (state: State) => state.content.datasetsByName,
+  datasetsByName => datasetsByName,
+);
+
+const selectSlidesBySlideNumber = createSelector(
+  (state: State) => state.content.slidesBySlideNumber,
+  slidesBySlideNumber => slidesBySlideNumber,
+);
+
+export const selectIsLoading = (state: State) => state.content.isLoading;
 
 export const selectCurrentCode = (state: State) => state.content.currentCode;
 
@@ -20,7 +33,7 @@ export const selectCurrentData = (state: State) => {
 export const selectActiveEditorTab = (state: State) =>
   state.content.activeEditorTab;
 
-export const selectAllContent = createSelector(
+export const selectCurrentContent = createSelector(
   [selectCurrentCode, selectCurrentData, selectCurrentPaths],
   (currentCode, currentData, currentPaths) => ({
     code: currentCode,
@@ -30,7 +43,7 @@ export const selectAllContent = createSelector(
 );
 
 export const selectEditorContents = createSelector(
-  [selectAllContent, selectActiveEditorTab],
+  [selectCurrentContent, selectActiveEditorTab],
   ({ code, data, paths }, activeEditorTab): EditorContents =>
     ({
       [ContentType.Code]: {
@@ -46,4 +59,31 @@ export const selectEditorContents = createSelector(
         value: paths,
       },
     }[activeEditorTab]),
+);
+
+export const selectIsSlideContentPresent = createSelector(
+  [selectDatasetsByName, selectSlidesBySlideNumber],
+  (datasetsByName, slidesBySlideNumber) =>
+    !isEmpty(datasetsByName) && !isEmpty(slidesBySlideNumber),
+);
+
+export const selectSlideContentsForSlideNumber = createSelector(
+  [
+    selectDatasetsByName,
+    selectSlidesBySlideNumber,
+    (_, slideNumber) => slideNumber,
+  ],
+  (datasetsByName, slidesBySlideNumber, slideNumber) => {
+    const slideData = get(slidesBySlideNumber, slideNumber.toString(), null);
+    if (isNil(slideData)) return { title: '', code: '', data: '' };
+
+    const { title, code, datasetName } = slideData;
+    const data = get(datasetsByName, datasetName, {});
+
+    return {
+      title,
+      code,
+      data,
+    };
+  },
 );

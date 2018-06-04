@@ -9,19 +9,15 @@ interface Props {
 }
 
 const Sidebar: React.SFC<Props> = ({ open, onToggleSidebar }) => {
-  const boxShadow =
-    'rgba(0, 0, 0, 0.188235) 0px 10px 20px,' +
-    'rgba(0, 0, 0, 0.227451) 0px 6px 6px';
-
   return (
     <Drawer
       open={open}
       drawerStyle={{
-        boxShadow,
-        background: 'rgba(255, 255, 255, 0.9)',
+        boxShadow: 'var(--main-box-shadow)',
+        background: 'rgba(255, 255, 255, 0.95)',
       }}
       zIndex={1}
-      width={352}
+      width={400}
     >
       <div
         className={css`

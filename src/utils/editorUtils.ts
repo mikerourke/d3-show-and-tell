@@ -43,6 +43,8 @@ export const addEditorActions = (editor: any, monaco: any, runActions: any) => {
     id: 'view-code-content',
     label: 'View Code',
     keybindings: [monaco.KeyMod.Alt | monaco.KeyCode.KEY_1],
+    contextMenuGroupId: 'tabs',
+    contextMenuOrder: 1,
     run: () => onUpdateTabKeysPressed(ContentType.Code),
   });
 
@@ -50,6 +52,8 @@ export const addEditorActions = (editor: any, monaco: any, runActions: any) => {
     id: 'view-data-content',
     label: 'View Data',
     keybindings: [monaco.KeyMod.Alt | monaco.KeyCode.KEY_2],
+    contextMenuGroupId: 'tabs',
+    contextMenuOrder: 2,
     run: () => onUpdateTabKeysPressed(ContentType.Data),
   });
 
@@ -57,17 +61,9 @@ export const addEditorActions = (editor: any, monaco: any, runActions: any) => {
     id: 'view-paths-content',
     label: 'View Paths',
     keybindings: [monaco.KeyMod.Alt | monaco.KeyCode.KEY_3],
+    contextMenuGroupId: 'tabs',
+    contextMenuOrder: 3,
     run: () => onUpdateTabKeysPressed(ContentType.Paths),
-  });
-
-  editor.addAction({
-    id: 'delete-this-line',
-    label: 'Delete Line',
-    keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_D],
-    run(thisEditor: any) {
-      thisEditor.trigger('keyboard', 'editor.action.deleteLines');
-      return null;
-    },
   });
 };
 

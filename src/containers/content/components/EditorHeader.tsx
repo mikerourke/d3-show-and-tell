@@ -13,33 +13,43 @@ import { ContentType } from '@customTypes/contentTypes';
 
 interface Props {
   activeTab: number;
-  onFormatClick: () => void;
-  onRefreshClick: () => void;
+  tabsShown: { [contentType: number]: boolean };
+  onResetClick: () => void;
   onSaveClick: () => void;
   onTabClick: (tabIndex: number) => void;
 }
 
 const EditorHeader: React.SFC<Props> = ({
   activeTab,
-  onFormatClick,
-  onRefreshClick,
+  tabsShown,
+  onResetClick,
   onSaveClick,
   onTabClick,
 }) => {
   const activeItemStyle = css`
-    border-bottom: 2px solid deepskyblue;
+    border-bottom: 2px solid var(--pandera-blue);
   `;
 
-  const renderNavbarItem = (title: string, contentType: ContentType) => (
-    <NavbarItem
-      onClick={() => onTabClick(contentType)}
-      href="#"
-      isActive={activeTab === contentType}
-      className={classnames({ [activeItemStyle]: activeTab === contentType })}
-    >
-      View {title}
-    </NavbarItem>
-  );
+  const renderNavbarItem = (title: string, contentType: ContentType) => {
+    if (!tabsShown[contentType]) return null;
+
+    const navbarItemStyle = css`
+      cursor: pointer;
+    `;
+
+    const isActive = activeTab === contentType;
+    return (
+      <NavbarItem
+        onClick={() => onTabClick(contentType)}
+        isActive={isActive}
+        className={classnames(navbarItemStyle, {
+          [activeItemStyle]: isActive,
+        })}
+      >
+        View {title}
+      </NavbarItem>
+    );
+  };
 
   const buttonStyle = css`
     margin-left: 4px;
@@ -73,18 +83,9 @@ const EditorHeader: React.SFC<Props> = ({
               isOutlined
               isSize="small"
               className={buttonStyle}
-              onClick={onRefreshClick}
+              onClick={onResetClick}
             >
               Reset
-            </Button>
-            <Button
-              isColor="dark"
-              isOutlined
-              isSize="small"
-              className={buttonStyle}
-              onClick={onFormatClick}
-            >
-              Format
             </Button>
           </NavbarItem>
         </NavbarEnd>

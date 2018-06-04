@@ -10,8 +10,8 @@ export const ROUTES = {
   app: {
     clientPath: '/',
   },
-  content: {
-    clientPath: '/content',
-    display: 'Content',
+  slides: {
+    clientPath: '/slides',
+    display: 'Slides',
   },
 };

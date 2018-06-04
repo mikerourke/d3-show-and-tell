@@ -2,10 +2,11 @@ import { Dispatch } from 'redux';
 import { createAction } from 'redux-actions';
 import { getValidContent } from '@utils/codeUtils';
 import { ContentType } from '@customTypes/contentTypes';
-import { selectActiveEditorTab } from './contentSelectors';
+import {
+  selectActiveEditorTab,
+  selectSlideContentsForSlideNumber,
+} from './contentSelectors';
 import { GetState } from '../reducers';
-import chapterContents from './chapters/contents.json';
-import chapterDatasets from './chapters/datasets.json';
 
 export const updateCurrentCode = createAction(
   '@content/UPDATE_CURRENT_CODE',
@@ -19,6 +20,16 @@ export const updateCurrentPaths = createAction(
   '@content/UPDATE_CURRENT_PATHS',
   (paths: string) => paths,
 );
+export const allContentsFetchStarted = createAction(
+  '@content/FETCH_ALL_STARTED',
+);
+export const allContentsFetchSuccess = createAction(
+  '@content/FETCH_ALL_SUCCESS',
+  (datasets: any, slides: any) => ({ datasets, slides }),
+);
+export const allContentsFetchFailure = createAction(
+  '@content/FETCH_ALL_FAILURE',
+);
 export const allContentLoaded = createAction(
   '@content/ALL_CONTENT_LOADED',
   (content: any) => content,
@@ -28,11 +39,32 @@ export const updateActiveEditorTab = createAction(
   (contentType: ContentType) => contentType,
 );
 
-export const loadAllContentForSection = (sectionNumber: number) => (
+const apiUrl = 'http://localhost:3000';
+
+const fetchFile = (fileName: string) =>
+  fetch(`${apiUrl}/content/${fileName}.json`)
+    .then((response: any) => response.json())
+    .catch(error => error);
+
+export const fetchAllContents = () => dispatch => {
+  dispatch(allContentsFetchStarted());
+  const fileNames = ['datasets', 'slides'];
+  return Promise.all(fileNames.map(fileName => fetchFile(fileName)))
+    .then(([datasets, slides]) =>
+      dispatch(allContentsFetchSuccess(datasets, slides)),
+    )
+    .catch(() => dispatch(allContentsFetchFailure()));
+};
+
+export const loadSlideContentsIntoCurrent = (slideNumber: string) => (
   dispatch: Dispatch<any>,
+  getState: GetState,
 ) => {
-  const { code, datasetName } = chapterContents['1'].sections['1'];
-  dispatch(allContentLoaded({ code, data: chapterDatasets[datasetName] }));
+  const { code, data } = selectSlideContentsForSlideNumber(
+    getState(),
+    slideNumber,
+  );
+  dispatch(allContentLoaded({ code, data }));
 };
 
 export const updateCurrentContent = (newValue: string) => (
