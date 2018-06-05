@@ -222,16 +222,6 @@ module.exports = {
     ],
   },
   plugins: [
-    new CopyWebpackPlugin([
-      {
-        from: 'node_modules/babel-standalone/babel.min.js',
-        to: 'public/lib/babel.min.js',
-      },
-      {
-        from: 'node_modules/d3/dist/d3.min.js',
-        to: 'public/lib/d3.min.js',
-      },
-    ]),
     // Generates an `index.html` file with the <script> injected.
     new HtmlWebpackPlugin({
       inject: true,

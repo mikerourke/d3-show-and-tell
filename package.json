@@ -9,7 +9,9 @@
   "scripts": {
     "start": "node scripts/start.js",
     "build": "node scripts/build.js",
-    "test": "node scripts/test.js --env=jsdom"
+    "test": "node scripts/test.js --env=jsdom",
+    "lint": "tslint -c tslint.json -p tsconfig.json || exit 0",
+    "prettier": "prettier --write src/**/*.{ts,tsx}"
   },
   "dependencies": {
     "animate.css": "^3.6.1",

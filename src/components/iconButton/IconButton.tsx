@@ -6,7 +6,7 @@ import iconPaths from './iconPaths';
 interface Props {
   iconName: string;
   color?: string;
-  onClick?: () => void;
+  onClick?: (event?: any) => void;
   height?: number;
   width?: number;
   className?: string;

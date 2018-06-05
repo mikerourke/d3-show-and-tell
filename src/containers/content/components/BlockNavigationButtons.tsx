@@ -1,7 +1,7 @@
 import React from 'react';
-import get from 'lodash/get';
 import capitalize from 'lodash/capitalize';
 import { css } from 'emotion';
+import { goToCommentOrComponent } from '@utils/editorUtils';
 import IconButton from '@components/iconButton/IconButton';
 
 interface Props {
@@ -9,45 +9,8 @@ interface Props {
 }
 
 const BlockNavigationButtons: React.SFC<Props> = ({ editor }) => {
-  const goToLineNumber = ({
-    startIncrement,
-    findFnName,
-  }: {
-    startIncrement: number;
-    findFnName: string;
-  }) => {
-    const { lineNumber } = editor.getPosition();
-
-    const goToMatch = editor
-      .getModel()
-      [findFnName](
-        /\/\/|\/\*/,
-        { column: 1, lineNumber: lineNumber + startIncrement },
-        true,
-        false,
-        null,
-        false,
-      );
-    const targetLineNumber = get(goToMatch, ['range', 'startLineNumber'], null);
-    if (targetLineNumber) {
-      editor.revealLineInCenter(targetLineNumber);
-      editor.setPosition({ lineNumber: targetLineNumber, column: 1 });
-      editor.focus();
-    }
-  };
-
-  const handleIconButtonClick = (direction: string) => () => {
-    const optionsByDirection = {
-      up: {
-        findFnName: 'findPreviousMatch',
-        startIncrement: -1,
-      },
-      down: {
-        findFnName: 'findNextMatch',
-        startIncrement: 1,
-      },
-    }[direction];
-    goToLineNumber(optionsByDirection);
+  const handleIconButtonClick = (direction: 'up' | 'down') => (event: any) => {
+    goToCommentOrComponent(editor, direction, event.metaKey);
   };
 
   const renderButton = (direction: 'up' | 'down') => (

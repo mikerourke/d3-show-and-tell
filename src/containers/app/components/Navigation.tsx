@@ -31,7 +31,11 @@ class Navigation extends React.Component<Props, State> {
     return (
       <React.Fragment>
         <Header onToggleSidebar={this.handleToggleSidebar} />
-        <Sidebar open={this.state.sidebarOpen} slideTitles={slideTitles} />
+        <Sidebar
+          open={this.state.sidebarOpen}
+          onToggleSidebar={this.handleToggleSidebar}
+          slideTitles={slideTitles}
+        />
       </React.Fragment>
     );
   }

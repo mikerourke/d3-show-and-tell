@@ -6,10 +6,15 @@ import { Link } from 'react-router-dom';
 
 interface Props {
   open: boolean;
+  onToggleSidebar: () => void;
   slideTitles: any[];
 }
 
 class Sidebar extends React.Component<Props> {
+  handleLinkClick = () => {
+    setTimeout(() => this.props.onToggleSidebar(), 500);
+  };
+
   render() {
     return (
       <Drawer
@@ -18,8 +23,13 @@ class Sidebar extends React.Component<Props> {
           boxShadow: 'var(--main-box-shadow)',
           background: 'rgba(255, 255, 255, 0.95)',
         }}
+        config={{
+          stiffness: 200,
+          damping: 50,
+        }}
         zIndex={1}
         width={400}
+        fadeOut
       >
         <div
           className={css`
@@ -32,7 +42,12 @@ class Sidebar extends React.Component<Props> {
             <MenuList>
               {this.props.slideTitles.map(({ slideNumber, title }) => (
                 <li key={slideNumber}>
-                  <Link to={`/slides/${slideNumber}`}>{title}</Link>
+                  <Link
+                    to={`/slides/${slideNumber}`}
+                    onClick={this.handleLinkClick}
+                  >
+                    {title}
+                  </Link>
                 </li>
               ))}
             </MenuList>
