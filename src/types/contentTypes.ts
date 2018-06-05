@@ -1,13 +1,24 @@
 export enum ContentType {
   Code = 0,
-  Data = 1,
-  Paths = 2,
+  Styles = 1,
+  Data = 2,
+  Paths = 3,
 }
 
-export interface ContentModel {
+export interface CurrentValuesModel {
   code: string;
-  data: string;
+  styles: string;
+  data: string | object;
   paths: string;
+}
+
+export interface SlideValuesModel {
+  slideNumber: number;
+  title: string;
+  code: string;
+  styles: string;
+  datasetName: string;
+  data: string;
 }
 
 export interface EditorContents {

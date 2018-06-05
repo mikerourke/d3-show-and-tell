@@ -4,7 +4,7 @@ import isNil from 'lodash/isNil';
 import { ContentType } from '@customTypes/contentTypes';
 
 // language=JavaScript
-const responsivefyFunction = `
+const sharedCode = `
   function responsivefy(svg) {
     // Get container + svg aspect ratio:
     var container = d3.select(svg.node().parentNode);
@@ -33,10 +33,7 @@ const responsivefyFunction = `
       svg.attr('height', Math.round(targetWidth / aspect));
     }
   }
-`;
 
-// language=JavaScript
-const renderFunction = `
   function render(component) {
     try {
       ReactDOM.render(component, document.getElementById('contents'));
@@ -54,12 +51,7 @@ export const getTransformedCode = (codeString: string) => {
   return transformedCode.code;
 };
 
-export const functionStrings = {
-  responsivefy: responsivefyFunction,
-  render: renderFunction,
-};
-
-export const validateCode = (codeString: string) => {
+const validateCode = (codeString: string) => {
   try {
     const options: any = {
       sourceType: 'script',
@@ -97,16 +89,48 @@ export const getValidContent = (
   return content;
 };
 
-export const appendScriptToPage = (identifier: string, content: string) => {
-  // Remove the existing <script> element from the page to prevent
-  // duplicate script tags.
+const appendChildElementToPage = (
+  identifier: string,
+  documentLocation: 'body' | 'head',
+  elementToAppend: any,
+) => {
+  // Remove the existing element from the page to prevent duplicate tags.
   const existingElement = document.querySelector(`#${identifier}`);
-  if (!isNil(existingElement)) document.body.removeChild(existingElement);
+  const documentElement: any = document[documentLocation];
+  if (!isNil(existingElement)) documentElement.removeChild(existingElement);
 
+  // Append the new element to the document location (head or body).
+  elementToAppend.id = identifier;
+  documentElement.appendChild(elementToAppend);
+};
+
+export const appendSharedCodeScriptToPage = () => {
   // Create a new <script> tag, populate it with the valid code, and append
   // it to the page.
   const scriptElement = document.createElement('script');
-  scriptElement.id = identifier;
-  scriptElement.text = content;
-  document.body.appendChild(scriptElement);
+  scriptElement.text = sharedCode;
+  appendChildElementToPage('shared-code', 'body', scriptElement);
+};
+
+export const appendCustomStyleToPage = (styles: string) => {
+  const styleElement = document.createElement('style');
+  styleElement.type = 'text/css';
+  styleElement.appendChild(document.createTextNode(styles));
+  appendChildElementToPage('custom-styles', 'head', styleElement);
+};
+
+export const populateAndExecuteCode = (code: string, data: string | object) => {
+  if (!validateCode(code)) return;
+
+  // Clear any existing chart content inside the contents element.
+  const contentsElement = document.querySelector('#contents');
+  if (!isNil(contentsElement)) contentsElement.innerHTML = '';
+
+  const validCode = getValidContent(ContentType.Code, code);
+  const validData = getValidContent(ContentType.Data, data);
+  const content = `
+      var currentData = ${validData};
+      ${getTransformedCode(validCode)}
+    `;
+  eval(content);
 };

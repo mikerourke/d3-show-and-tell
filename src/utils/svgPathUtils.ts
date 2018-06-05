@@ -15,6 +15,8 @@ const getPathNodes = () => {
   const pathNodes: any = document.querySelectorAll('path:not(.iconButton)');
   const validNodes = [];
   for (const pathNode of pathNodes) {
+    const parentName = pathNode.parentNode.getAttribute('name');
+    if (parentName) pathNode.setAttribute('name', parentName);
     validNodes.push(pathNode);
   }
   return validNodes;
@@ -79,8 +81,10 @@ class SvgPathPrettifier {
         props[camelCase(validName)] = getNumericValue(value);
       }
     }
-    const propsString = this.buildPropsStringPairs(props).join(' ');
-    return ['<Path ', propsString, '>'].join('');
+    const propsStringPairs = this.buildPropsStringPairs(props);
+    const propsString =
+      propsStringPairs.length === 0 ? '' : ` ${propsStringPairs.join(' ')}`;
+    return ['<Path', propsString, '>'].join('');
   }
 
   private assignAxisForPath(svgRecords) {

@@ -262,7 +262,7 @@ module.exports = {
     //   tslint: paths.appTsLint,
     // }),
     new MonacoWebpackPlugin({
-      languages: ['json', 'typescript', 'javascript'],
+      languages: ['css', 'json', 'typescript', 'javascript'],
     }),
   ],
   // Some libraries import Node modules but don't use them in the browser.

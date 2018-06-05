@@ -1,59 +1,57 @@
 import React from 'react';
-import { Columns, Column, Title } from 'bloomer';
+import { Columns, Column } from 'bloomer';
 import { css } from 'emotion';
 import { connect } from 'react-redux';
-import isNil from 'lodash/isNil';
 import {
-  functionStrings,
-  appendScriptToPage,
-  getValidContent,
-  getTransformedCode,
-  validateCode,
+  appendSharedCodeScriptToPage,
+  populateAndExecuteCode,
+  appendCustomStyleToPage,
 } from '@utils/codeUtils';
-import {
-  fetchAllContents,
-  loadSlideContentsIntoCurrent,
-  updateActiveEditorTab,
-  updateCurrentContent,
-  updateCurrentPaths,
-} from '@redux/content/contentActions';
-import {
-  selectActiveEditorTab,
-  selectCurrentContent,
-  selectEditorContents,
-  selectIsLoading,
-  selectIsSlideContentPresent,
-  selectSlideContentsForSlideNumber,
-} from '@redux/content/contentSelectors';
-import { State as ReduxState } from '@redux/reducers';
-import {
-  ContentModel,
-  ContentType,
-  EditorContents,
-} from '@customTypes/contentTypes';
-import Editor from './components/Editor';
-import EditorHeader from './components/EditorHeader';
 import { loadCursorPosition, saveCursorPosition } from '@utils/editorUtils';
 import {
   getPathComponentsFromContents,
   updatePathsFromChanges,
 } from '@utils/svgPathUtils';
+import {
+  fetchAllSlideContents,
+  setCurrentValuesToSlideValues,
+  updateActiveEditorTab,
+  updateCurrentValueForContentType,
+} from '@redux/content/contentActions';
+import {
+  selectActiveEditorTab,
+  selectCurrentValues,
+  selectEditorContents,
+  selectAreSlideValuesPresent,
+  selectSlideValuesForSlideNumber,
+} from '@redux/content/contentSelectors';
+import { State as ReduxState } from '@redux/reducers';
+import {
+  CurrentValuesModel,
+  ContentType,
+  EditorContents,
+} from '@customTypes/contentTypes';
+import Editor from './components/Editor';
+import EditorHeader from './components/EditorHeader';
+import BlockNavigationButtons from '@containers/content/components/BlockNavigationButtons';
 
 interface StateProps {
   activeEditorTab: ContentType;
   editorContents: EditorContents;
-  currentContent: ContentModel;
-  isLoading: boolean;
+  currentValues: CurrentValuesModel;
   isSlideContentPresent: boolean;
-  slideContents: any;
+  slideValues: any;
+  slideNumber: number;
 }
 
 interface DispatchProps {
   onFetchAllContents: () => Promise<any>;
-  onLoadSlideContentsIntoCurrent: () => void;
+  onSetCurrentValuesToSlideValues: (contentType?: ContentType) => void;
   onUpdateActiveEditorTab: (contentType: ContentType) => void;
-  onUpdateCurrentContent: (newValue: string) => void;
-  onUpdateCurrentPaths: (newValue: string) => void;
+  onUpdateCurrentValueForContentType: (
+    contentType: ContentType,
+    newValue: string,
+  ) => void;
 }
 
 interface OwnProps {
@@ -71,18 +69,16 @@ interface State {
 }
 
 export class ContentComponent extends React.Component<Props, State> {
-  contentElement: any;
   editor: any;
 
   constructor(props: Props) {
     super(props);
-    this.contentElement = null;
     this.editor = null;
-
     this.state = {
       tabsShown: {
         [ContentType.Code]: true,
-        [ContentType.Data]: true,
+        [ContentType.Styles]: true,
+        [ContentType.Data]: false,
         [ContentType.Paths]: false,
       },
     };
@@ -90,17 +86,18 @@ export class ContentComponent extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    setTimeout(() => {
-      const pathsValue = getPathComponentsFromContents();
-      this.props.onUpdateCurrentPaths(pathsValue);
-      this.updateTabShown(ContentType.Paths, pathsValue !== null);
-    }, 1000);
+    this.updatePaths();
   }
 
-  componentDidUpdate() {
-    this.props.onLoadSlideContentsIntoCurrent();
-    loadCursorPosition(this.editor, this.props.activeEditorTab);
-    this.editor.focus();
+  componentDidUpdate(prevProps: Props) {
+    if (prevProps.activeEditorTab !== this.props.activeEditorTab) {
+      loadCursorPosition(this.editor, this.props.activeEditorTab);
+      this.editor.focus();
+    }
+
+    if (prevProps.slideNumber !== this.props.slideNumber) {
+      this.populateContentFromSlide();
+    }
   }
 
   initializeContent = async () => {
@@ -108,18 +105,30 @@ export class ContentComponent extends React.Component<Props, State> {
       await this.props.onFetchAllContents();
     }
 
-    this.props.onLoadSlideContentsIntoCurrent();
+    this.populateContentFromSlide();
+  };
+
+  populateContentFromSlide = () => {
+    this.props.onSetCurrentValuesToSlideValues();
 
     setTimeout(() => {
-      appendScriptToPage(
-        'shared-code',
-        Object.values(functionStrings).join('\n'),
-      );
+      appendSharedCodeScriptToPage();
       this.updateScriptContents();
+      const hasData = !/{}/g.test(this.props.currentValues.data.toString());
+      this.updateTabsShown(ContentType.Data, hasData);
+      this.updatePaths();
     }, 0);
   };
 
-  updateTabShown = (contentType: ContentType, isShown: boolean) =>
+  updatePaths = () => {
+    setTimeout(() => {
+      const paths = getPathComponentsFromContents();
+      this.props.onUpdateCurrentValueForContentType(ContentType.Paths, paths);
+      this.updateTabsShown(ContentType.Paths, paths !== null);
+    }, 1000);
+  };
+
+  updateTabsShown = (contentType: ContentType, isShown: boolean) =>
     this.setState(state => ({
       tabsShown: {
         ...state.tabsShown,
@@ -128,22 +137,9 @@ export class ContentComponent extends React.Component<Props, State> {
     }));
 
   updateScriptContents = () => {
-    const { code, data } = this.props.currentContent;
-    this.updateTabShown(ContentType.Data, data !== '');
-
-    if (!validateCode(code)) return;
-
-    // Clear any existing chart content inside the contents element.
-    const contentsElement = document.querySelector('#contents');
-    if (!isNil(contentsElement)) contentsElement.innerHTML = '';
-
-    const validCode = getValidContent(ContentType.Code, code);
-    const validData = getValidContent(ContentType.Data, data);
-    const content = `
-      var currentData = ${validData};
-      ${getTransformedCode(validCode)}
-    `;
-    eval(content);
+    const { code, styles, data } = this.props.currentValues;
+    appendCustomStyleToPage(styles);
+    populateAndExecuteCode(code, data);
   };
 
   handleEditorDidMount = (editor: any) => {
@@ -156,19 +152,34 @@ export class ContentComponent extends React.Component<Props, State> {
     this.props.onUpdateActiveEditorTab(tabIndex);
   };
 
+  handleEditorChange = (newValue: string) => {
+    const { activeEditorTab, onUpdateCurrentValueForContentType } = this.props;
+    onUpdateCurrentValueForContentType(activeEditorTab, newValue);
+  };
+
   handleSaveAction = () => {
-    if (this.props.activeEditorTab === ContentType.Paths) {
+    const { activeEditorTab, onUpdateCurrentValueForContentType } = this.props;
+    if (activeEditorTab === ContentType.Paths) {
       const editorValue = this.editor.getValue();
       updatePathsFromChanges(editorValue);
-      this.props.onUpdateCurrentPaths(editorValue);
+      onUpdateCurrentValueForContentType(activeEditorTab, editorValue);
     } else {
       this.updateScriptContents();
+      setTimeout(() => {
+        const paths = getPathComponentsFromContents();
+        this.props.onUpdateCurrentValueForContentType(ContentType.Paths, paths);
+      }, 0);
     }
   };
 
   handleResetClick = () => {
-
-  }
+    const { activeEditorTab, onSetCurrentValuesToSlideValues } = this.props;
+    onSetCurrentValuesToSlideValues(activeEditorTab);
+    setTimeout(() => {
+      this.handleSaveAction();
+      this.editor.trigger('keyboard', 'editor.action.formatDocument');
+    }, 0);
+  };
 
   render() {
     return (
@@ -177,26 +188,28 @@ export class ContentComponent extends React.Component<Props, State> {
           margin: 8px;
         `}
       >
-        <Column>
+        <Column
+          className={css`
+            position: relative;
+          `}
+        >
           <EditorHeader
             activeTab={this.props.activeEditorTab}
             tabsShown={this.state.tabsShown}
-            onResetClick={() => {}}
+            onResetClick={this.handleResetClick}
             onSaveClick={this.handleSaveAction}
             onTabClick={this.handleActiveEditorTabChange}
           />
           <Editor
             contents={this.props.editorContents}
             onEditorDidMount={this.handleEditorDidMount}
-            onEditorChange={this.props.onUpdateCurrentContent}
+            onEditorChange={this.handleEditorChange}
             onSaveKeysPressed={this.handleSaveAction}
             onUpdateTabKeysPressed={this.handleActiveEditorTabChange}
           />
+          <BlockNavigationButtons editor={this.editor} />
         </Column>
         <Column>
-          <Title isFullWidth hasTextAlign="centered" hasTextColor="dark">
-            Imagination Station&trade;
-          </Title>
           <div id="contents" className="chart" />
         </Column>
       </Columns>
@@ -215,10 +228,10 @@ export default connect(
   ) => ({
     activeEditorTab: selectActiveEditorTab(state),
     editorContents: selectEditorContents(state),
-    currentContent: selectCurrentContent(state),
-    isLoading: selectIsLoading(state),
-    isSlideContentPresent: selectIsSlideContentPresent(state),
-    slideContents: selectSlideContentsForSlideNumber(state, slideNumber),
+    currentValues: selectCurrentValues(state),
+    isSlideContentPresent: selectAreSlideValuesPresent(state),
+    slideValues: selectSlideValuesForSlideNumber(state, slideNumber),
+    slideNumber: +slideNumber,
   }),
   (
     dispatch: any,
@@ -228,13 +241,12 @@ export default connect(
       },
     }: OwnProps,
   ) => ({
-    onFetchAllContents: () => dispatch(fetchAllContents()),
-    onLoadSlideContentsIntoCurrent: () =>
-      dispatch(loadSlideContentsIntoCurrent(slideNumber)),
+    onFetchAllContents: () => dispatch(fetchAllSlideContents()),
+    onSetCurrentValuesToSlideValues: contentType =>
+      dispatch(setCurrentValuesToSlideValues(slideNumber, contentType)),
     onUpdateActiveEditorTab: contentType =>
       dispatch(updateActiveEditorTab(contentType)),
-    onUpdateCurrentContent: newValue =>
-      dispatch(updateCurrentContent(newValue)),
-    onUpdateCurrentPaths: newValue => dispatch(updateCurrentPaths(newValue)),
+    onUpdateCurrentValueForContentType: (contentType, newValue) =>
+      dispatch(updateCurrentValueForContentType(contentType, newValue)),
   }),
 )(ContentComponent);

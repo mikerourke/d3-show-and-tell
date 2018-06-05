@@ -46,7 +46,7 @@ const EditorHeader: React.SFC<Props> = ({
           [activeItemStyle]: isActive,
         })}
       >
-        View {title}
+        {title}
       </NavbarItem>
     );
   };
@@ -65,6 +65,7 @@ const EditorHeader: React.SFC<Props> = ({
       <NavbarMenu>
         <NavbarStart>
           {renderNavbarItem('Code', ContentType.Code)}
+          {renderNavbarItem('Styles', ContentType.Styles)}
           {renderNavbarItem('Data', ContentType.Data)}
           {renderNavbarItem('Paths', ContentType.Paths)}
         </NavbarStart>

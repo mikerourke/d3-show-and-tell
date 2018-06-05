@@ -8,7 +8,7 @@ const Routes = () => (
   <Root>
     <BrowserRouter>
       <Switch>
-        <Route path="/" component={App} />
+        <Route path="/:path" component={App} />
         <Redirect
           from={ROUTES.app.clientPath}
           to={`${ROUTES.slides.clientPath}/1`}

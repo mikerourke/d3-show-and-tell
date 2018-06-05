@@ -1,79 +1,80 @@
 import { handleActions, combineActions } from 'redux-actions';
 import {
-  allContentsFetchStarted,
-  allContentsFetchSuccess,
-  allContentsFetchFailure,
-  allContentLoaded,
-  updateCurrentCode,
-  updateCurrentData,
-  updateCurrentPaths,
+  allSlidesFetchStarted,
+  allSlidesFetchSuccess,
+  allSlidesFetchFailure,
+  allCurrentValuesUpdated,
+  updateCurrentValue,
   updateActiveEditorTab,
 } from './contentActions';
-import { ContentType } from '../../types/contentTypes';
+import {
+  ContentType,
+  CurrentValuesModel,
+  SlideValuesModel,
+} from '../../types/contentTypes';
 
 export interface ContentState {
-  readonly currentCode: string;
-  readonly currentData: string | object;
-  readonly currentPaths: string;
+  readonly currentValuesByContentType: CurrentValuesModel;
   readonly activeEditorTab: ContentType;
-  readonly datasetsByName: any;
-  readonly slidesBySlideNumber: any;
+  readonly datasetsByName: {
+    [datasetName: string]: any;
+  };
+  readonly slideValuesBySlideNumber: {
+    [slideNumber: string]: SlideValuesModel;
+  };
   readonly isLoading: boolean;
 }
 
 export const initialState: ContentState = {
-  currentCode: '',
-  currentData: '',
-  currentPaths: '',
+  currentValuesByContentType: {
+    code: '',
+    styles: '',
+    data: '',
+    paths: '',
+  },
   activeEditorTab: ContentType.Code,
   datasetsByName: {},
-  slidesBySlideNumber: {},
+  slideValuesBySlideNumber: {},
   isLoading: false,
 };
 
 const contentReducer = handleActions(
   {
-    [allContentsFetchSuccess.toString()]: (
+    [allSlidesFetchSuccess.toString()]: (
       state: ContentState,
       { payload: { datasets, slides } }: any,
     ) => ({
       ...state,
       datasetsByName: datasets,
-      slidesBySlideNumber: slides,
+      slideValuesBySlideNumber: slides,
     }),
 
-    [allContentLoaded.toString()]: (
+    [allCurrentValuesUpdated.toString()]: (
       state: ContentState,
-      { payload: { code, data } }: any,
+      { payload: { code, styles, data } }: any,
     ) => ({
       ...state,
-      currentCode: code,
-      currentData: JSON.stringify(data, null, '  '),
+      currentValuesByContentType: {
+        ...state.currentValuesByContentType,
+        code,
+        styles,
+        data: JSON.stringify(data, null, '  '),
+      },
     }),
 
-    [updateCurrentCode.toString()]: (
+    [updateCurrentValue.toString()]: (
       state: ContentState,
-      { payload: currentCode }: any,
-    ) => ({
-      ...state,
-      currentCode,
-    }),
-
-    [updateCurrentData.toString()]: (
-      state: ContentState,
-      { payload: currentData }: any,
-    ) => ({
-      ...state,
-      currentData,
-    }),
-
-    [updateCurrentPaths.toString()]: (
-      state: ContentState,
-      { payload: currentPaths }: any,
-    ) => ({
-      ...state,
-      currentPaths,
-    }),
+      { payload: { contentType, newValue } }: any,
+    ) => {
+      const contentTypeKey = ['code', 'styles', 'data', 'paths'][contentType];
+      return {
+        ...state,
+        currentValuesByContentType: {
+          ...state.currentValuesByContentType,
+          [contentTypeKey]: newValue,
+        },
+      };
+    },
 
     [updateActiveEditorTab.toString()]: (
       state: ContentState,
@@ -83,14 +84,14 @@ const contentReducer = handleActions(
       activeEditorTab: contentType,
     }),
 
-    [allContentsFetchStarted.toString()]: (state: ContentState) => ({
+    [allSlidesFetchStarted.toString()]: (state: ContentState) => ({
       ...state,
       isLoading: true,
     }),
 
     [combineActions(
-      allContentsFetchSuccess.toString(),
-      allContentsFetchFailure.toString(),
+      allSlidesFetchSuccess.toString(),
+      allSlidesFetchFailure.toString(),
     ) as any]: (state: ContentState) => ({
       ...state,
       isLoading: false,

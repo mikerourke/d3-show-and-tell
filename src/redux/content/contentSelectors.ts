@@ -12,43 +12,38 @@ const selectDatasetsByName = createSelector(
 );
 
 const selectSlidesBySlideNumber = createSelector(
-  (state: State) => state.content.slidesBySlideNumber,
-  slidesBySlideNumber => slidesBySlideNumber,
+  (state: State) => state.content.slideValuesBySlideNumber,
+  slideValuesBySlideNumber => slideValuesBySlideNumber,
 );
-
-export const selectIsLoading = (state: State) => state.content.isLoading;
-
-export const selectCurrentCode = (state: State) => state.content.currentCode;
-
-export const selectCurrentPaths = (state: State) => state.content.currentPaths;
-
-export const selectCurrentData = (state: State) => {
-  const currentData = get(state, ['content', 'currentData'], null);
-  if (isNil(currentData)) return '';
-  return isString(currentData)
-    ? currentData
-    : JSON.stringify(currentData, null, ' ');
-};
 
 export const selectActiveEditorTab = (state: State) =>
   state.content.activeEditorTab;
 
-export const selectCurrentContent = createSelector(
-  [selectCurrentCode, selectCurrentData, selectCurrentPaths],
-  (currentCode, currentData, currentPaths) => ({
-    code: currentCode,
-    data: currentData,
-    paths: currentPaths,
-  }),
+export const selectCurrentValues = createSelector(
+  (state: State) => state.content.currentValuesByContentType,
+  ({ code, styles, data, paths }) => {
+    const validData = isString(data) ? data : JSON.stringify(data, null, ' ');
+
+    return {
+      code,
+      styles,
+      paths,
+      data: validData,
+    };
+  },
 );
 
 export const selectEditorContents = createSelector(
-  [selectCurrentContent, selectActiveEditorTab],
-  ({ code, data, paths }, activeEditorTab): EditorContents =>
+  [selectCurrentValues, selectActiveEditorTab],
+  ({ code, styles, data, paths }, activeEditorTab): EditorContents =>
     ({
       [ContentType.Code]: {
         language: 'javascript' as any,
         value: code,
+      },
+      [ContentType.Styles]: {
+        language: 'css' as any,
+        value: styles,
       },
       [ContentType.Data]: {
         language: 'json' as any,
@@ -61,29 +56,40 @@ export const selectEditorContents = createSelector(
     }[activeEditorTab]),
 );
 
-export const selectIsSlideContentPresent = createSelector(
+export const selectAreSlideValuesPresent = createSelector(
   [selectDatasetsByName, selectSlidesBySlideNumber],
-  (datasetsByName, slidesBySlideNumber) =>
-    !isEmpty(datasetsByName) && !isEmpty(slidesBySlideNumber),
+  (datasetsByName, slideValuesBySlideNumber) =>
+    !isEmpty(datasetsByName) && !isEmpty(slideValuesBySlideNumber),
 );
 
-export const selectSlideContentsForSlideNumber = createSelector(
+export const selectSlideValuesForSlideNumber = createSelector(
   [
     selectDatasetsByName,
     selectSlidesBySlideNumber,
     (_, slideNumber) => slideNumber,
   ],
-  (datasetsByName, slidesBySlideNumber, slideNumber) => {
-    const slideData = get(slidesBySlideNumber, slideNumber.toString(), null);
-    if (isNil(slideData)) return { title: '', code: '', data: '' };
+  (datasetsByName, slideValuesBySlideNumber, slideNumber) => {
+    const slideValues = get(
+      slideValuesBySlideNumber,
+      slideNumber.toString(),
+      null,
+    );
+    if (isNil(slideValues)) {
+      return { title: '', code: '', styles: '', data: '' };
+    }
 
-    const { title, code, datasetName } = slideData;
+    const { datasetName } = slideValues;
     const data = get(datasetsByName, datasetName, {});
 
-    return {
-      title,
-      code,
-      data,
-    };
+    return { ...slideValues, data };
   },
+);
+
+export const selectSlideTitles = createSelector(
+  selectSlidesBySlideNumber,
+  slidesBySlideNumber =>
+    Object.values(slidesBySlideNumber).map(({ slideNumber, title }) => ({
+      slideNumber,
+      title,
+    })),
 );

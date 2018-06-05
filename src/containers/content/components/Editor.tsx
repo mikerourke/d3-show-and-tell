@@ -1,5 +1,5 @@
 import React from 'react';
-import MonacoEditor from 'react-monaco-editor';
+import { default as MonacoEditor } from 'react-monaco-editor';
 import { elementHeights } from '@constants';
 import { BoxDimensions } from '@customTypes/commonTypes';
 import { EditorContents } from '@customTypes/contentTypes';

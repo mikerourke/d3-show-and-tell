@@ -43,26 +43,27 @@ export const addEditorActions = (editor: any, monaco: any, runActions: any) => {
     id: 'view-code-content',
     label: 'View Code',
     keybindings: [monaco.KeyMod.Alt | monaco.KeyCode.KEY_1],
-    contextMenuGroupId: 'tabs',
-    contextMenuOrder: 1,
     run: () => onUpdateTabKeysPressed(ContentType.Code),
+  });
+
+  editor.addAction({
+    id: 'view-styles-content',
+    label: 'View Styles',
+    keybindings: [monaco.KeyMod.Alt | monaco.KeyCode.KEY_2],
+    run: () => onUpdateTabKeysPressed(ContentType.Styles),
   });
 
   editor.addAction({
     id: 'view-data-content',
     label: 'View Data',
-    keybindings: [monaco.KeyMod.Alt | monaco.KeyCode.KEY_2],
-    contextMenuGroupId: 'tabs',
-    contextMenuOrder: 2,
+    keybindings: [monaco.KeyMod.Alt | monaco.KeyCode.KEY_3],
     run: () => onUpdateTabKeysPressed(ContentType.Data),
   });
 
   editor.addAction({
     id: 'view-paths-content',
     label: 'View Paths',
-    keybindings: [monaco.KeyMod.Alt | monaco.KeyCode.KEY_3],
-    contextMenuGroupId: 'tabs',
-    contextMenuOrder: 3,
+    keybindings: [monaco.KeyMod.Alt | monaco.KeyCode.KEY_4],
     run: () => onUpdateTabKeysPressed(ContentType.Paths),
   });
 };
@@ -70,7 +71,9 @@ export const addEditorActions = (editor: any, monaco: any, runActions: any) => {
 const getStorageKeyByContentType = (contentType: ContentType) =>
   ({
     [ContentType.Code]: 'codeLinePosition',
+    [ContentType.Styles]: 'stylesLinePosition',
     [ContentType.Data]: 'dataLinePosition',
+    [ContentType.Paths]: 'pathsLinePosition',
   }[contentType]);
 
 export const saveCursorPosition = (editor: any, previousTab: ContentType) => {
@@ -89,10 +92,6 @@ export const loadCursorPosition = (
     column: 1,
   };
 
-  // For some reason, the Code editor reveals the line 5 above, but the Data
-  // editor reveals to the line 5 below.
-  const increment = activeEditorTab === ContentType.Code ? -5 : 5;
-  const lineToReveal = +lineNumber < 7 ? +lineNumber : +lineNumber + increment;
-  editor.revealLine(lineToReveal);
+  editor.revealLineInCenter(lineNumber);
   editor.setPosition({ lineNumber, column });
 };

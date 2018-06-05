@@ -2,37 +2,26 @@ import { Dispatch } from 'redux';
 import { createAction } from 'redux-actions';
 import { getValidContent } from '@utils/codeUtils';
 import { ContentType } from '@customTypes/contentTypes';
-import {
-  selectActiveEditorTab,
-  selectSlideContentsForSlideNumber,
-} from './contentSelectors';
+import { selectSlideValuesForSlideNumber } from './contentSelectors';
 import { GetState } from '../reducers';
 
-export const updateCurrentCode = createAction(
-  '@content/UPDATE_CURRENT_CODE',
-  (code: string) => code,
+export const allSlidesFetchStarted = createAction(
+  '@content/FETCH_ALL_SLIDES_STARTED',
 );
-export const updateCurrentData = createAction(
-  '@content/UPDATE_CURRENT_DATA',
-  (data: string | object) => data,
-);
-export const updateCurrentPaths = createAction(
-  '@content/UPDATE_CURRENT_PATHS',
-  (paths: string) => paths,
-);
-export const allContentsFetchStarted = createAction(
-  '@content/FETCH_ALL_STARTED',
-);
-export const allContentsFetchSuccess = createAction(
-  '@content/FETCH_ALL_SUCCESS',
+export const allSlidesFetchSuccess = createAction(
+  '@content/FETCH_ALL_SLIDES_SUCCESS',
   (datasets: any, slides: any) => ({ datasets, slides }),
 );
-export const allContentsFetchFailure = createAction(
-  '@content/FETCH_ALL_FAILURE',
+export const allSlidesFetchFailure = createAction(
+  '@content/FETCH_ALL_SLIDES_FAILURE',
 );
-export const allContentLoaded = createAction(
-  '@content/ALL_CONTENT_LOADED',
-  (content: any) => content,
+export const updateCurrentValue = createAction(
+  '@content/UPDATE_CURRENT_VALUE',
+  (contentType: ContentType, newValue: string) => ({ contentType, newValue }),
+);
+export const allCurrentValuesUpdated = createAction(
+  '@content/ALL_CURRENT_VALUES_UPDATED',
+  (values: any) => values,
 );
 export const updateActiveEditorTab = createAction(
   '@content/UPDATE_ACTIVE_EDITOR_TAB',
@@ -46,45 +35,45 @@ const fetchFile = (fileName: string) =>
     .then((response: any) => response.json())
     .catch(error => error);
 
-export const fetchAllContents = () => dispatch => {
-  dispatch(allContentsFetchStarted());
+export const fetchAllSlideContents = () => dispatch => {
+  dispatch(allSlidesFetchStarted());
   const fileNames = ['datasets', 'slides'];
   return Promise.all(fileNames.map(fileName => fetchFile(fileName)))
     .then(([datasets, slides]) =>
-      dispatch(allContentsFetchSuccess(datasets, slides)),
+      dispatch(allSlidesFetchSuccess(datasets, slides)),
     )
-    .catch(() => dispatch(allContentsFetchFailure()));
+    .catch(() => dispatch(allSlidesFetchFailure()));
 };
 
-export const loadSlideContentsIntoCurrent = (slideNumber: string) => (
-  dispatch: Dispatch<any>,
-  getState: GetState,
-) => {
-  const { code, data } = selectSlideContentsForSlideNumber(
+export const setCurrentValuesToSlideValues = (
+  slideNumber: string,
+  contentType: ContentType | null = null,
+) => (dispatch: Dispatch<any>, getState: GetState) => {
+  const { code, data, styles } = selectSlideValuesForSlideNumber(
     getState(),
     slideNumber,
   );
-  dispatch(allContentLoaded({ code, data }));
+
+  if (contentType === null) {
+    return dispatch(allCurrentValuesUpdated({ code, styles, data }));
+  }
+
+  const valueToUse = {
+    [ContentType.Code]: code,
+    [ContentType.Styles]: styles,
+    [ContentType.Data]: data,
+  }[contentType];
+
+  return dispatch(updateCurrentValue(contentType, valueToUse));
 };
 
-export const updateCurrentContent = (newValue: string) => (
-  dispatch: Dispatch<any>,
-  getState: GetState,
-) => {
-  const activeEditorTab = selectActiveEditorTab(getState());
-
-  if (activeEditorTab === ContentType.Code) {
-    return dispatch(updateCurrentCode(newValue));
-  }
-
-  if (activeEditorTab === ContentType.Data) {
-    const validContent = getValidContent(activeEditorTab, newValue);
-    return dispatch(updateCurrentData(validContent));
-  }
-
-  if (activeEditorTab === ContentType.Paths) {
-    return dispatch(updateCurrentPaths(newValue));
-  }
-
-  return Promise.resolve();
+export const updateCurrentValueForContentType = (
+  contentType: ContentType,
+  newValue: string,
+) => dispatch => {
+  const validContent =
+    contentType === ContentType.Data
+      ? getValidContent(contentType, newValue)
+      : newValue;
+  return dispatch(updateCurrentValue(contentType, validContent));
 };

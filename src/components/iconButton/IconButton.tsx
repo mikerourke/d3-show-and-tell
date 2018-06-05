@@ -10,12 +10,14 @@ interface Props {
   height?: number;
   width?: number;
   className?: string;
+  children?: any;
 }
 
 const IconButton: React.SFC<Props> = ({
   iconName,
-  color = '#374047',
+  color = 'var(--dark-gray)',
   className = '',
+  children,
   ...rest
 }) => {
   const svgStyle = css`
@@ -34,6 +36,7 @@ const IconButton: React.SFC<Props> = ({
       viewBox="0 0 24 24"
       {...rest}
     >
+      {children}
       <path d={iconPaths[iconName]} className="iconButton" />
     </svg>
   );
