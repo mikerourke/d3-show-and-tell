@@ -1,13 +1,15 @@
 import React from 'react';
-import { Columns, Column } from 'bloomer';
 import { css } from 'emotion';
 import { connect } from 'react-redux';
 import {
-  appendSharedCodeScriptToPage,
   populateAndExecuteCode,
   appendCustomStyleToPage,
 } from '@utils/codeUtils';
-import { loadCursorPosition, saveCursorPosition } from '@utils/editorUtils';
+import {
+  loadCursorPosition,
+  saveCursorPosition,
+  resetAllCursorPositions,
+} from '@utils/editorUtils';
 import {
   getPathComponentsFromContents,
   updatePathsFromChanges,
@@ -24,6 +26,7 @@ import {
   selectEditorContents,
   selectAreSlideValuesPresent,
   selectSlideValuesForSlideNumber,
+  selectSlideTitleBySlideNumber,
 } from '@redux/content/contentSelectors';
 import { State as ReduxState } from '@redux/reducers';
 import {
@@ -34,6 +37,7 @@ import {
 import Editor from './components/Editor';
 import EditorHeader from './components/EditorHeader';
 import BlockNavigationButtons from '@containers/content/components/BlockNavigationButtons';
+import SlideNavigation from '@containers/content/components/SlideNavigation';
 
 interface StateProps {
   activeEditorTab: ContentType;
@@ -41,6 +45,7 @@ interface StateProps {
   currentValues: CurrentValuesModel;
   isSlideContentPresent: boolean;
   slideValues: any;
+  slideTitle: string;
   slideNumber: number;
 }
 
@@ -86,10 +91,10 @@ export class ContentComponent extends React.Component<Props, State> {
   }
 
   componentDidMount() {
-    this.updatePaths();
+    this.updatePaths(1000);
   }
 
-  componentDidUpdate(prevProps: Props) {
+  componentDidUpdate(prevProps: Props, prevState: State) {
     if (prevProps.activeEditorTab !== this.props.activeEditorTab) {
       loadCursorPosition(this.editor, this.props.activeEditorTab);
       this.editor.focus();
@@ -97,6 +102,8 @@ export class ContentComponent extends React.Component<Props, State> {
 
     if (prevProps.slideNumber !== this.props.slideNumber) {
       this.populateContentFromSlide();
+      resetAllCursorPositions(this.editor);
+      this.editor.focus();
     }
   }
 
@@ -104,7 +111,6 @@ export class ContentComponent extends React.Component<Props, State> {
     if (!this.props.isSlideContentPresent) {
       await this.props.onFetchAllContents();
     }
-
     this.populateContentFromSlide();
   };
 
@@ -112,20 +118,19 @@ export class ContentComponent extends React.Component<Props, State> {
     this.props.onSetCurrentValuesToSlideValues();
 
     setTimeout(() => {
-      appendSharedCodeScriptToPage();
       this.updateScriptContents();
       const hasData = !/{}/g.test(this.props.currentValues.data.toString());
       this.updateTabsShown(ContentType.Data, hasData);
-      this.updatePaths();
+      this.updatePaths(1000);
     }, 0);
   };
 
-  updatePaths = () => {
+  updatePaths = (timeout: number) => {
     setTimeout(() => {
       const paths = getPathComponentsFromContents();
       this.props.onUpdateCurrentValueForContentType(ContentType.Paths, paths);
       this.updateTabsShown(ContentType.Paths, paths !== null);
-    }, 1000);
+    }, timeout);
   };
 
   updateTabsShown = (contentType: ContentType, isShown: boolean) =>
@@ -165,10 +170,7 @@ export class ContentComponent extends React.Component<Props, State> {
       onUpdateCurrentValueForContentType(activeEditorTab, editorValue);
     } else {
       this.updateScriptContents();
-      setTimeout(() => {
-        const paths = getPathComponentsFromContents();
-        this.props.onUpdateCurrentValueForContentType(ContentType.Paths, paths);
-      }, 0);
+      this.updatePaths(0);
     }
   };
 
@@ -182,17 +184,27 @@ export class ContentComponent extends React.Component<Props, State> {
   };
 
   render() {
+    const columnStyle = css`
+      float: left;
+      width: 48%;
+      margin: 0 1%;
+      position: relative;
+    `;
+
     return (
-      <Columns
+      <div
         className={css`
           margin: 8px;
+          height: calc(100% - 84px);
+
+          &:after {
+            content: '';
+            display: table;
+            clear: both;
+          }
         `}
       >
-        <Column
-          className={css`
-            position: relative;
-          `}
-        >
+        <div className={columnStyle}>
           <EditorHeader
             activeTab={this.props.activeEditorTab}
             tabsShown={this.state.tabsShown}
@@ -208,11 +220,15 @@ export class ContentComponent extends React.Component<Props, State> {
             onUpdateTabKeysPressed={this.handleActiveEditorTabChange}
           />
           <BlockNavigationButtons editor={this.editor} />
-        </Column>
-        <Column>
+        </div>
+        <div className={columnStyle}>
+          <SlideNavigation
+            slideNumber={this.props.slideNumber}
+            slideTitle={this.props.slideTitle}
+          />
           <div id="contents" className="chart" />
-        </Column>
-      </Columns>
+        </div>
+      </div>
     );
   }
 }
@@ -231,6 +247,7 @@ export default connect(
     currentValues: selectCurrentValues(state),
     isSlideContentPresent: selectAreSlideValuesPresent(state),
     slideValues: selectSlideValuesForSlideNumber(state, slideNumber),
+    slideTitle: selectSlideTitleBySlideNumber(state, +slideNumber),
     slideNumber: +slideNumber,
   }),
   (

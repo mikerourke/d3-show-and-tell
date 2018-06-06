@@ -10,7 +10,7 @@ interface Props {
   slideTitles: any[];
 }
 
-class Sidebar extends React.Component<Props> {
+export default class Sidebar extends React.Component<Props> {
   handleLinkClick = () => {
     setTimeout(() => this.props.onToggleSidebar(), 500);
   };
@@ -57,5 +57,3 @@ class Sidebar extends React.Component<Props> {
     );
   }
 }
-
-export default Sidebar;

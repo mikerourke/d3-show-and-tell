@@ -167,3 +167,13 @@ export const loadCursorPosition = (
   editor.revealLineInCenter(lineNumber);
   editor.setPosition({ lineNumber, column });
 };
+
+export const resetAllCursorPositions = (editor: any) => {
+  const resetPosition = { lineNumber: 1, column: 1 };
+  [0, 1, 2, 3].forEach(contentType => {
+    const storageKey = getStorageKeyByContentType(contentType);
+    store.set(storageKey, resetPosition);
+  });
+  editor.revealLine(1);
+  editor.setPosition(resetPosition);
+};

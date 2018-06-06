@@ -93,3 +93,19 @@ export const selectSlideTitles = createSelector(
       title,
     })),
 );
+
+export const selectSlideTitleBySlideNumber = createSelector(
+  [selectSlideTitles, (_, slideNumber) => slideNumber],
+  (slideTitles, slideNumber) => {
+    const slideRecord = slideTitles.find(
+      slide => slide.slideNumber === slideNumber,
+    );
+    if (slideRecord) return slideRecord.title;
+    return '';
+  },
+);
+
+export const selectTotalSlideCount = createSelector(
+  selectSlidesBySlideNumber,
+  slidesBySlideNumber => Object.keys(slidesBySlideNumber).length,
+);

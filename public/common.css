@@ -1,0 +1,79 @@
+:root {
+  --slide-height: 1080px;
+  --slide-header-height: 180px;
+  --slide-footer-height: 75px;
+}
+
+.renderErrorTitle {
+  font-size: 24px;
+  font-weight: bold;
+}
+
+.renderErrorStack {
+  font-size: 12px;
+  white-space: pre-wrap;
+  max-height: 600px;
+}
+
+.renderErrorHeader {
+  font-size: 18px;
+  font-weight: bold;
+  margin: 8px 0;
+}
+
+.slideText {
+  alignment-baseline: central;
+  fill: var(--gray-text);
+}
+
+.slideHeader {
+  height: var(--slide-header-height);
+}
+
+.slideHeader > rect {
+  width: 100%;
+  height: var(--slide-header-height);
+  fill: var(--light-gray)
+}
+
+.slideHeader > text {
+  font-family: "Proxima Nova Light";
+  font-size: 72px;
+  font-weight: 100;
+  text-anchor: middle;
+}
+
+.slideFooter > line {
+  stroke: var(--light-gray);
+  stroke-width: 2px;
+}
+
+.slideFooter > text {
+  font-size: 24px;
+  text-anchor: middle;
+}
+
+.bulletedItemText {
+  font-family: "Work Sans";
+  font-size: 48px;
+}
+
+.filledBullet {
+  fill: var(--dark-gray);
+}
+
+.hollowBullet {
+  fill: none;
+  stroke: var(--dark-gray);
+  stroke-width: 2px;
+}
+
+.slideFooter > line {
+  stroke: var(--light-gray);
+  stroke-width: 2px;
+}
+
+.slideFooter > text {
+  font-size: 24px;
+  text-anchor: middle;
+}

@@ -19,16 +19,7 @@ const BlockNavigationButtons: React.SFC<Props> = ({ editor }) => {
       color="var(--pandera-blue)"
       onClick={handleIconButtonClick(direction)}
     >
-      <circle
-        cx={12}
-        cy={12}
-        r={10}
-        className={css`
-          stroke-width: 2px;
-          stroke: var(--pandera-blue);
-        `}
-        fill="white"
-      />
+      <circle cx={12} cy={12} r={10} fill="white" />
     </IconButton>
   );
 

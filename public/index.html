@@ -5,53 +5,14 @@
     <meta name="theme-color" content="#000000">
     <meta name="google" content="notranslate">
     <link rel="manifest" href="./manifest.json">
-    <link rel="stylesheet" type="text/css" href="./fonts/fonts.css" />
-    <!--<script src="../lib/react.js"></script>-->
-    <!--<script src="../lib/react-dom.js"></script>-->
-    <!--<script src="../lib/d3.min.js"></script>-->
-    <!--<script src="../lib/babel.min.js"></script>-->
+    <link rel="stylesheet" type="text/css" href="../fonts/fonts.css" />
+    <link rel="stylesheet" type="text/css" href="../common.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.6.2/react.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/15.6.2/react-dom.min.js"></script>
     <script src="https://unpkg.com/d3@5.4.0/dist/d3.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.js"></script>
-    <script type="application/javascript">
-      function responsivefy(svg) {
-        // Get container + svg aspect ratio:
-        var container = d3.select(svg.node().parentNode);
-        var width = parseInt(svg.style('width')) || 1;
-        var height = parseInt(svg.style('height')) || 1;
-        var aspect = width / height;
-
-        // Add viewBox and preserveAspectRatio properties, and call resize so that
-        // svg resizes on inital page load:
-        svg.attr('viewBox', '0 0 ' + width + ' ' + height)
-          .attr('preserveAspectRatio', 'xMinYMid')
-          .call(resize);
-
-        /**
-         * To register multiple listeners for same event type, you need to add
-         * namespace, i.e., 'click.foo' necessary if you call invoke this function
-         * for multiple svgs API docs.
-         * @see https://github.com/mbostock/d3/wiki/Selections#on
-         */
-        d3.select(window).on('resize.' + container.attr('id'), resize);
-
-        // Get width of container and resize svg to fit it:
-        function resize() {
-          var targetWidth = parseInt(container.style('width'));
-          svg.attr('width', targetWidth);
-          svg.attr('height', Math.round(targetWidth / aspect));
-        }
-      }
-
-      function render(component) {
-        try {
-          ReactDOM.render(component, document.getElementById('contents'));
-        } catch (error) {
-          console.log(error);
-        }
-      }
-    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.10/lodash.min.js"></script>
+    <script src="../common.js" type="application/javascript"></script>
     <title>D3 Show and Tell</title>
   </head>
   <body>

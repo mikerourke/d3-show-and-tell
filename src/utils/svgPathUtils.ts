@@ -95,11 +95,26 @@ class SvgPathPrettifier {
   }
 
   private getSvgRecordsFromPathNode() {
-    const pathValue = this.pathNode.getAttribute('d');
-    const records = parseSVG(pathValue);
-    return records.map(
-      record => (record.relative ? record : { ...record, relative: false }),
-    );
+    let pathValue = this.pathNode.getAttribute('d');
+    if (!pathValue) {
+      // This is for SVG paths that have their "d" property specified in
+      // a CSS file.
+      const dValue = window
+        .getComputedStyle(this.pathNode)
+        .getPropertyValue('d');
+      pathValue = dValue.replace(/path\('|'\)/g, '');
+    }
+
+    try {
+      const records = !!pathValue ? parseSVG(pathValue) : [];
+      if (records.length === 0) return [];
+      return records.map(
+        record => (record.relative ? record : { ...record, relative: false }),
+      );
+    } catch (error) {
+      console.log(error);
+      return [];
+    }
   }
 
   private buildComponentStringFromRecord(svgRecord) {
@@ -154,12 +169,17 @@ class SvgPathUglifier {
         return { ...acc, type: descriptor };
       }
 
-      if (!/={/g.test(descriptor)) return acc;
+      if (!/={|="/g.test(descriptor)) return acc;
 
       const [propName, propValue] = descriptor.split('=');
+      const validPropValue = propValue
+        .replace(/"positive"|true/g, 1)
+        .replace(/"negative"|false/g, 0)
+        .replace(/[{}]/g, '');
+
       return {
         ...acc,
-        [propName]: +propValue.replace(/[{}]/g, ''),
+        [propName]: +validPropValue,
       };
     }, {});
 
@@ -223,6 +243,7 @@ class SvgPathUglifier {
 
 export const getPathComponentsFromContents = () => {
   const pathNodes: any = getPathNodes();
+  console.log(pathNodes);
   if (pathNodes.length === 0) return null;
   const svgPrettifier = new SvgPathPrettifier();
   const componentStrings = pathNodes.map(pathNode =>

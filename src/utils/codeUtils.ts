@@ -3,46 +3,6 @@ import * as babylon from 'babylon';
 import isNil from 'lodash/isNil';
 import { ContentType } from '@customTypes/contentTypes';
 
-// language=JavaScript
-const sharedCode = `
-  function responsivefy(svg) {
-    // Get container + svg aspect ratio:
-    var container = d3.select(svg.node().parentNode);
-    var width = parseInt(svg.style('width')) || 1;
-    var height = parseInt(svg.style('height')) || 1;
-    var aspect = width / height;
-  
-    // Add viewBox and preserveAspectRatio properties, and call resize so that
-    // svg resizes on inital page load:
-    svg.attr('viewBox', '0 0 ' + width + ' ' + height)
-      .attr('preserveAspectRatio', 'xMinYMid')
-      .call(resize);
-  
-    /**
-     * To register multiple listeners for same event type, you need to add
-     * namespace, i.e., 'click.foo' necessary if you call invoke this function
-     * for multiple svgs API docs.
-     * @see https://github.com/mbostock/d3/wiki/Selections#on
-     */
-    d3.select(window).on('resize.' + container.attr('id'), resize);
-  
-    // Get width of container and resize svg to fit it:
-    function resize() {
-      var targetWidth = parseInt(container.style('width'));
-      svg.attr('width', targetWidth);
-      svg.attr('height', Math.round(targetWidth / aspect));
-    }
-  }
-
-  function render(component) {
-    try {
-      ReactDOM.render(component, document.getElementById('contents'));
-    } catch (error) {
-      console.log(error);
-    }
-  }
-`;
-
 export const getTransformedCode = (codeString: string) => {
   const transformedCode = babel.transform(codeString, {
     plugins: ['transform-react-jsx', 'transform-object-rest-spread'],
@@ -102,14 +62,6 @@ const appendChildElementToPage = (
   // Append the new element to the document location (head or body).
   elementToAppend.id = identifier;
   documentElement.appendChild(elementToAppend);
-};
-
-export const appendSharedCodeScriptToPage = () => {
-  // Create a new <script> tag, populate it with the valid code, and append
-  // it to the page.
-  const scriptElement = document.createElement('script');
-  scriptElement.text = sharedCode;
-  appendChildElementToPage('shared-code', 'body', scriptElement);
 };
 
 export const appendCustomStyleToPage = (styles: string) => {

@@ -24,7 +24,7 @@ const getScreenDimensions = (): BoxDimensions => ({
   width: window.innerWidth,
 });
 
-class Editor extends React.Component<Props, State> {
+export default class Editor extends React.Component<Props, State> {
   state = {
     windowDimensions: getScreenDimensions(),
   };
@@ -96,5 +96,3 @@ class Editor extends React.Component<Props, State> {
     );
   }
 }
-
-export default Editor;
