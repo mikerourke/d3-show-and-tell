@@ -8,6 +8,7 @@
   "homepage": "http://d3-show-and-tell.surge.sh/",
   "license": "MIT",
   "scripts": {
+    "deploy": "surge -p ./build -d d3-show-and-tell.surge.sh",
     "start": "node scripts/start.js",
     "prebuild": "rm -rf ./build && mkdir build",
     "build": "node scripts/build.js",
