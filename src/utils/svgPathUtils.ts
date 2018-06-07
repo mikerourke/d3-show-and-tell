@@ -140,7 +140,7 @@ class SvgPathPrettifier {
 
     this.assignAxisForPath(svgRecords);
 
-    const commentString = `\n// This is the start of a path!`;
+    const commentString = `\n// @bookmark`;
     return [commentString, pathComponentString, childrenString, '</Path>'].join(
       '\n',
     );
@@ -241,16 +241,20 @@ class SvgPathUglifier {
   }
 }
 
+const instructionsHeader = `/**
+ * Change any of the Path element values and the updates will be reflected
+ * in the element display.
+ */`;
+
 export const getPathComponentsFromContents = () => {
   const pathNodes: any = getPathNodes();
-  console.log(pathNodes);
   if (pathNodes.length === 0) return null;
   const svgPrettifier = new SvgPathPrettifier();
   const componentStrings = pathNodes.map(pathNode =>
     svgPrettifier.buildPrettySvgPath(pathNode),
   );
   const pathBlocks = componentStrings.join('\n');
-  return ['<Paths>', pathBlocks, '</Paths>'].join('\n');
+  return [instructionsHeader, '<Paths>', pathBlocks, '</Paths>'].join('\n');
 };
 
 export const updatePathsFromChanges = (newPaths: string) => {

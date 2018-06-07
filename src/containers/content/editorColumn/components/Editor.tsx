@@ -1,15 +1,17 @@
 import React from 'react';
 import { default as MonacoEditor } from 'react-monaco-editor';
 import { elementHeights } from '@constants';
-import { BoxDimensions } from '@customTypes/commonTypes';
-import { EditorContents } from '@customTypes/contentTypes';
 import { configureMonaco, addEditorActions } from '@utils/editorUtils';
+import { BoxDimensions, CodeEditor, Monaco } from '@customTypes/commonTypes';
+import { ContentType } from '@customTypes/contentTypes';
 
 interface Props {
-  contents: EditorContents;
-  onEditorDidMount: (editor: any) => void;
+  contentType: ContentType;
+  language: string;
+  value: string;
+  onEditorDidMount: (editor: CodeEditor) => void;
   onEditorChange: (newValue: any, event: any) => void;
-  onSaveKeysPressed: (editor: any) => void;
+  onSaveKeysPressed: (editor: CodeEditor) => void;
   onUpdateTabKeysPressed: (tabIndex: number) => void;
 }
 
@@ -45,7 +47,7 @@ export default class Editor extends React.Component<Props, State> {
     configureMonaco(monaco);
   };
 
-  editorDidMount = (editor: any, monaco: any) => {
+  editorDidMount = (editor: CodeEditor, monaco: Monaco) => {
     this.props.onEditorDidMount(editor);
     addEditorActions(editor, monaco, this.props);
     editor.getModel().updateOptions({ tabSize: 2 });
@@ -64,7 +66,6 @@ export default class Editor extends React.Component<Props, State> {
   };
 
   render() {
-    const { contents, onEditorChange } = this.props;
     const { height, width } = this.getEditorDimensions();
 
     const options = {
@@ -79,17 +80,18 @@ export default class Editor extends React.Component<Props, State> {
       minimap: {
         enabled: true,
       },
+      glyphMargin: true,
     };
 
     return (
       <MonacoEditor
         height={height}
         width={width}
-        language={contents.language}
+        language={this.props.language}
         theme="vs"
-        value={contents.value}
+        value={this.props.value}
         options={options}
-        onChange={onEditorChange}
+        onChange={this.props.onEditorChange}
         editorDidMount={this.editorDidMount}
         editorWillMount={this.editorWillMount}
       />

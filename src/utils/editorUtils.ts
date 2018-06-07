@@ -1,8 +1,14 @@
-import * as store from 'store';
+import * as globalMonaco from 'monaco-editor';
 import get from 'lodash/get';
 import { ContentType } from '@customTypes/contentTypes';
+import { CodeEditor, Direction, Monaco } from '@customTypes/commonTypes';
+import {
+  getStorageForContentType,
+  setStorageForContentType,
+  setStorageForAllContentTypes,
+} from '@utils/storageUtils';
 
-export const configureMonaco = (monaco: any) => {
+export const configureMonaco = (monaco: Monaco) => {
   const compilerDefaults = {
     allowJs: true,
     allowNonTsExtensions: true,
@@ -30,17 +36,17 @@ export const configureMonaco = (monaco: any) => {
   });
 };
 
-export const goToCommentOrComponent = (
-  editor: any,
-  direction: 'up' | 'down',
-  skipToBlock: boolean,
+export const goToBookmarkOrComponent = (
+  editor: CodeEditor,
+  direction: Direction,
+  skipToBookmark: boolean,
 ) => {
   const { findFnName, startIncrement } = {
-    up: {
+    previous: {
       findFnName: 'findPreviousMatch',
       startIncrement: 0,
     },
-    down: {
+    next: {
       findFnName: 'findNextMatch',
       startIncrement: 1,
     },
@@ -50,7 +56,7 @@ export const goToCommentOrComponent = (
   const goToMatch = editor
     .getModel()
     [findFnName](
-      skipToBlock ? /\/\/|\/\*/ : /<[a-zA-z]/,
+      skipToBookmark ? /@bookmark/ : /<[a-zA-z]/,
       { column: 1, lineNumber: lineNumber + startIncrement },
       true,
       false,
@@ -65,7 +71,50 @@ export const goToCommentOrComponent = (
   }
 };
 
-export const addEditorActions = (editor: any, monaco: any, runActions: any) => {
+export const highlightBookmarks = (editor: CodeEditor) => {
+  const matches = editor
+    .getModel()
+    .findMatches('@bookmark', false, false, false, null, false);
+  const foundRanges = matches.map(match => match.range);
+
+  editorDecorations = editor.deltaDecorations(editorDecorations, [
+    { range: new globalMonaco.Range(1, 1, 1, 1), options: {} },
+  ]);
+
+  const newDecorations = [];
+  foundRanges.forEach(foundRange => {
+    const {
+      startLineNumber,
+      startColumn,
+      endLineNumber,
+      endColumn,
+    } = foundRange;
+
+    const range = new globalMonaco.Range(
+      startLineNumber,
+      startColumn,
+      endLineNumber,
+      endColumn,
+    );
+    const options = {
+      isWholeLine: true,
+      className: 'editorLineHighlight',
+      glyphMarginClassName: 'editorGlyphMargin',
+    };
+    newDecorations.push({ range, options });
+  });
+
+  editorDecorations = editor.deltaDecorations(
+    editorDecorations,
+    newDecorations,
+  );
+};
+
+export const addEditorActions = (
+  editor: CodeEditor,
+  monaco: Monaco,
+  runActions: any,
+) => {
   const { onSaveKeysPressed, onUpdateTabKeysPressed } = runActions;
 
   editor.addAction({
@@ -76,23 +125,23 @@ export const addEditorActions = (editor: any, monaco: any, runActions: any) => {
   });
 
   editor.addAction({
-    id: 'go-to-previous-block',
-    label: 'Go To Previous Block',
-    keybindings: [monaco.KeyMod.Alt | monaco.KeyCode.PageUp],
+    id: 'go-to-previous-bookmark',
+    label: 'Go To Previous Bookmark',
+    keybindings: [monaco.KeyMod.Shift | monaco.KeyCode.F5],
     keybindingContext: null,
-    contextMenuGroupId: 'blocks',
+    contextMenuGroupId: 'bookmarks',
     contextMenuOrder: 1,
-    run: () => goToCommentOrComponent(editor, 'up', true),
+    run: () => goToBookmarkOrComponent(editor, 'previous', true),
   });
 
   editor.addAction({
-    id: 'go-to-next-block',
-    label: 'Go To Next Block',
-    keybindings: [monaco.KeyMod.Alt | monaco.KeyCode.PageDown],
+    id: 'go-to-next-bookmark',
+    label: 'Go To Next Bookmark',
+    keybindings: [monaco.KeyCode.F5],
     keybindingContext: null,
-    contextMenuGroupId: 'blocks',
+    contextMenuGroupId: 'bookmarks',
     contextMenuOrder: 2,
-    run: () => goToCommentOrComponent(editor, 'down', true),
+    run: () => goToBookmarkOrComponent(editor, 'next', true),
   });
 
   editor.addAction({
@@ -100,7 +149,7 @@ export const addEditorActions = (editor: any, monaco: any, runActions: any) => {
     label: 'Go To Previous Element',
     keybindings: [monaco.KeyMod.Alt | monaco.KeyCode.US_OPEN_SQUARE_BRACKET],
     keybindingContext: null,
-    run: () => goToCommentOrComponent(editor, 'up', false),
+    run: () => goToBookmarkOrComponent(editor, 'previous', false),
   });
 
   editor.addAction({
@@ -108,7 +157,7 @@ export const addEditorActions = (editor: any, monaco: any, runActions: any) => {
     label: 'Go To Next Element',
     keybindings: [monaco.KeyMod.Alt | monaco.KeyCode.US_CLOSE_SQUARE_BRACKET],
     keybindingContext: null,
-    run: () => goToCommentOrComponent(editor, 'down', false),
+    run: () => goToBookmarkOrComponent(editor, 'next', false),
   });
 
   editor.addAction({
@@ -140,40 +189,31 @@ export const addEditorActions = (editor: any, monaco: any, runActions: any) => {
   });
 };
 
-const getStorageKeyByContentType = (contentType: ContentType) =>
-  ({
-    [ContentType.Code]: 'codeLinePosition',
-    [ContentType.Styles]: 'stylesLinePosition',
-    [ContentType.Data]: 'dataLinePosition',
-    [ContentType.Paths]: 'pathsLinePosition',
-  }[contentType]);
-
-export const saveCursorPosition = (editor: any, previousTab: ContentType) => {
-  const { lineNumber, column } = editor.getPosition();
-  const storageKey = getStorageKeyByContentType(previousTab);
-  store.set(storageKey, { lineNumber, column });
+export const saveStateForContentType = (
+  editor: CodeEditor,
+  contentType: ContentType,
+) => {
+  const position = editor.getPosition();
+  const value = editor.getValue();
+  setStorageForContentType(contentType, { position, value });
 };
 
 export const loadCursorPosition = (
-  editor: any,
-  activeEditorTab: ContentType,
+  editor: CodeEditor,
+  contentType: ContentType,
 ) => {
-  const storageKey = getStorageKeyByContentType(activeEditorTab);
-  const { lineNumber, column } = store.get(storageKey) || {
-    lineNumber: 1,
-    column: 1,
-  };
-
-  editor.revealLineInCenter(lineNumber);
-  editor.setPosition({ lineNumber, column });
+  const storedState = getStorageForContentType(contentType);
+  const lineNumber = get(storedState, ['position', 'lineNumber'], 1);
+  const column = get(storedState, ['position', 'column'], 1);
+  setTimeout(() => {
+    editor.revealLineInCenter(lineNumber);
+    editor.setPosition({ lineNumber, column });
+  }, 0);
 };
 
-export const resetAllCursorPositions = (editor: any) => {
+export const resetAllCursorPositions = (editor: CodeEditor) => {
   const resetPosition = { lineNumber: 1, column: 1 };
-  [0, 1, 2, 3].forEach(contentType => {
-    const storageKey = getStorageKeyByContentType(contentType);
-    store.set(storageKey, resetPosition);
-  });
+  setStorageForAllContentTypes({ position: resetPosition });
   editor.revealLine(1);
   editor.setPosition(resetPosition);
 };

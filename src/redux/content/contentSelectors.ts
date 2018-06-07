@@ -1,10 +1,12 @@
 import { createSelector } from 'reselect';
 import get from 'lodash/get';
-import isEmpty from 'lodash/isEmpty';
 import isNil from 'lodash/isNil';
-import isString from 'lodash/isString';
+import {
+  getCurrentSlideNumber,
+  getNameForContentType,
+} from '@utils/commonUtils';
 import { State } from '../reducers';
-import { ContentType, EditorContents } from '@customTypes/contentTypes';
+import { ContentType } from '@customTypes/contentTypes';
 
 const selectDatasetsByName = createSelector(
   (state: State) => state.content.datasetsByName,
@@ -19,56 +21,9 @@ const selectSlidesBySlideNumber = createSelector(
 export const selectActiveEditorTab = (state: State) =>
   state.content.activeEditorTab;
 
-export const selectCurrentValues = createSelector(
-  (state: State) => state.content.currentValuesByContentType,
-  ({ code, styles, data, paths }) => {
-    const validData = isString(data) ? data : JSON.stringify(data, null, ' ');
-
-    return {
-      code,
-      styles,
-      paths,
-      data: validData,
-    };
-  },
-);
-
-export const selectEditorContents = createSelector(
-  [selectCurrentValues, selectActiveEditorTab],
-  ({ code, styles, data, paths }, activeEditorTab): EditorContents =>
-    ({
-      [ContentType.Code]: {
-        language: 'javascript' as any,
-        value: code,
-      },
-      [ContentType.Styles]: {
-        language: 'css' as any,
-        value: styles,
-      },
-      [ContentType.Data]: {
-        language: 'json' as any,
-        value: data,
-      },
-      [ContentType.Paths]: {
-        language: 'javascript' as any,
-        value: paths,
-      },
-    }[activeEditorTab]),
-);
-
-export const selectAreSlideValuesPresent = createSelector(
-  [selectDatasetsByName, selectSlidesBySlideNumber],
-  (datasetsByName, slideValuesBySlideNumber) =>
-    !isEmpty(datasetsByName) && !isEmpty(slideValuesBySlideNumber),
-);
-
 export const selectSlideValuesForSlideNumber = createSelector(
-  [
-    selectDatasetsByName,
-    selectSlidesBySlideNumber,
-    (_, slideNumber) => slideNumber,
-  ],
-  (datasetsByName, slideValuesBySlideNumber, slideNumber) => {
+  [selectDatasetsByName, selectSlidesBySlideNumber],
+  (datasetsByName, slideValuesBySlideNumber) => slideNumber => {
     const slideValues = get(
       slideValuesBySlideNumber,
       slideNumber.toString(),
@@ -79,9 +34,21 @@ export const selectSlideValuesForSlideNumber = createSelector(
     }
 
     const { datasetName } = slideValues;
-    const data = get(datasetsByName, datasetName, {});
+    const datasetData = get(datasetsByName, datasetName, {});
+    const data = JSON.stringify(datasetData, null, '  ');
 
     return { ...slideValues, data };
+  },
+);
+
+export const selectContentValuesForReset = createSelector(
+  [selectSlideValuesForSlideNumber, (_, contentType) => contentType],
+  (getSlideValuesForSlideNumber, contentType) => {
+    const contentTypeName = getNameForContentType(contentType).toLowerCase();
+    const slideNumber = getCurrentSlideNumber();
+    const slideValues = getSlideValuesForSlideNumber(slideNumber);
+    if (contentType === ContentType.Paths) return '';
+    return get(slideValues, contentTypeName, '');
   },
 );
 
@@ -94,18 +61,27 @@ export const selectSlideTitles = createSelector(
     })),
 );
 
-export const selectSlideTitleBySlideNumber = createSelector(
+// export const selectCurrentSlideDetails = createSelector(
+//   selectSlideTitles,
+//   slideTitles => {
+//     const slideNumber = getCurrentSlideNumber();
+//     const slideRecord = slideTitles.find(
+//       slide => slide.slideNumber === slideNumber,
+//     );
+//     const slideTitle = slideRecord ? slideRecord.title : '';
+//     return {
+//       slideTitle,
+//       slideNumber,
+//     };
+//   },
+// );
+
+export const selectCurrentSlideTitle = createSelector(
   [selectSlideTitles, (_, slideNumber) => slideNumber],
   (slideTitles, slideNumber) => {
     const slideRecord = slideTitles.find(
-      slide => slide.slideNumber === slideNumber,
+      slide => +slide.slideNumber === +slideNumber,
     );
-    if (slideRecord) return slideRecord.title;
-    return '';
+    return slideRecord ? slideRecord.title : '';
   },
-);
-
-export const selectTotalSlideCount = createSelector(
-  selectSlidesBySlideNumber,
-  slidesBySlideNumber => Object.keys(slidesBySlideNumber).length,
 );

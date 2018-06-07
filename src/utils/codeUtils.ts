@@ -2,6 +2,14 @@ import * as babel from 'babel-standalone';
 import * as babylon from 'babylon';
 import isNil from 'lodash/isNil';
 import { ContentType } from '@customTypes/contentTypes';
+import {
+  getStorageForAllContentTypes,
+  setStorageForContentType,
+} from '@utils/storageUtils';
+import {
+  getPathComponentsFromContents,
+  updatePathsFromChanges,
+} from '@utils/svgPathUtils';
 
 export const getTransformedCode = (codeString: string) => {
   const transformedCode = babel.transform(codeString, {
@@ -84,5 +92,38 @@ export const populateAndExecuteCode = (code: string, data: string | object) => {
       var currentData = ${validData};
       ${getTransformedCode(validCode)}
     `;
-  eval(content);
+  try {
+    eval(content);
+  } catch (error) {
+    console.log(error);
+  }
 };
+
+export const applyChangesToContent = (
+  contentType?: ContentType,
+  newValue?: any,
+) =>
+  new Promise((resolve, reject) => {
+    try {
+      const { code, data, styles } = getStorageForAllContentTypes();
+      appendCustomStyleToPage(styles.value);
+      populateAndExecuteCode(code.value, data.value);
+      if (contentType === ContentType.Paths) {
+        setTimeout(() => {
+          updatePathsFromChanges(newValue);
+          resolve();
+        }, 100);
+      } else {
+        setTimeout(() => {
+          const paths = getPathComponentsFromContents();
+          const NO_PATHS = `// There are no <path> elements in your Code file!`;
+          setStorageForContentType(ContentType.Paths, {
+            value: paths || NO_PATHS,
+          });
+          resolve();
+        }, 500);
+      }
+    } catch (error) {
+      reject(error);
+    }
+  });

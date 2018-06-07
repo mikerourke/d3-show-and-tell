@@ -1,9 +1,12 @@
-import { Dispatch } from 'redux';
 import { createAction } from 'redux-actions';
-import { getValidContent } from '@utils/codeUtils';
+import { contentTypeArray, getCurrentSlideNumber } from '@utils/commonUtils';
+import { setStorageForContentType } from '@utils/storageUtils';
 import { ContentType } from '@customTypes/contentTypes';
-import { selectSlideValuesForSlideNumber } from './contentSelectors';
-import { GetState } from '../reducers';
+import {
+  selectContentValuesForReset,
+  selectSlideValuesForSlideNumber,
+} from './contentSelectors';
+import { State } from '../reducers';
 
 export const allSlidesFetchStarted = createAction(
   '@content/FETCH_ALL_SLIDES_STARTED',
@@ -14,14 +17,6 @@ export const allSlidesFetchSuccess = createAction(
 );
 export const allSlidesFetchFailure = createAction(
   '@content/FETCH_ALL_SLIDES_FAILURE',
-);
-export const updateCurrentValue = createAction(
-  '@content/UPDATE_CURRENT_VALUE',
-  (contentType: ContentType, newValue: string) => ({ contentType, newValue }),
-);
-export const allCurrentValuesUpdated = createAction(
-  '@content/ALL_CURRENT_VALUES_UPDATED',
-  (values: any) => values,
 );
 export const updateActiveEditorTab = createAction(
   '@content/UPDATE_ACTIVE_EDITOR_TAB',
@@ -35,7 +30,7 @@ const fetchFile = (fileName: string) =>
     .then((response: any) => response.json())
     .catch(error => error);
 
-export const fetchAllSlideContents = () => dispatch => {
+export const fetchAllSlideContents = (): any => dispatch => {
   dispatch(allSlidesFetchStarted());
   const fileNames = ['datasets', 'slides'];
   return Promise.all(fileNames.map(fileName => fetchFile(fileName)))
@@ -45,35 +40,46 @@ export const fetchAllSlideContents = () => dispatch => {
     .catch(() => dispatch(allSlidesFetchFailure()));
 };
 
-export const setCurrentValuesToSlideValues = (
-  slideNumber: string,
-  contentType: ContentType | null = null,
-) => (dispatch: Dispatch<any>, getState: GetState) => {
-  const { code, data, styles } = selectSlideValuesForSlideNumber(
-    getState(),
-    slideNumber,
-  );
+const populateStorageWithSlideContents = (
+  getState: () => State,
+  slideNumber: number,
+  position?: any,
+) => {
+  const slideValues = selectSlideValuesForSlideNumber(getState())(slideNumber);
+  const { code, styles, data } = slideValues;
+  const values = [code, styles, data, ''];
+  const languages = ['javascript', 'css', 'json', 'javascript'];
 
-  if (contentType === null) {
-    return dispatch(allCurrentValuesUpdated({ code, styles, data }));
-  }
-
-  const valueToUse = {
-    [ContentType.Code]: code,
-    [ContentType.Styles]: styles,
-    [ContentType.Data]: data,
-  }[contentType];
-
-  return dispatch(updateCurrentValue(contentType, valueToUse));
+  contentTypeArray.forEach(contentType => {
+    setStorageForContentType(contentType, {
+      position,
+      value: values[contentType] as any,
+      language: languages[contentType],
+    });
+  });
 };
 
-export const updateCurrentValueForContentType = (
-  contentType: ContentType,
-  newValue: string,
-) => dispatch => {
-  const validContent =
-    contentType === ContentType.Data
-      ? getValidContent(contentType, newValue)
-      : newValue;
-  return dispatch(updateCurrentValue(contentType, validContent));
+export const initializeStorage = (): any => async (dispatch, getState) => {
+  await dispatch(fetchAllSlideContents());
+  const slideNumber = getCurrentSlideNumber();
+  populateStorageWithSlideContents(getState, slideNumber, {
+    lineNumber: 1,
+    columnNumber: 1,
+  });
+};
+
+export const updateStorageForSlideNumber = (slideNumber: number): any => (
+  dispatch,
+  getState,
+) => {
+  populateStorageWithSlideContents(getState, slideNumber);
+};
+
+export const resetActiveTabContents = (contentType: ContentType): any => (
+  dispatch,
+  getState,
+) => {
+  const resetValue = selectContentValuesForReset(getState(), contentType);
+  setStorageForContentType(contentType, { value: resetValue });
+  return Promise.resolve();
 };

@@ -4,6 +4,10 @@
   --slide-footer-height: 75px;
 }
 
+#contents {
+  box-shadow: var(--main-box-shadow);
+}
+
 .renderErrorTitle {
   font-size: 24px;
   font-weight: bold;
@@ -37,7 +41,7 @@
 }
 
 .slideHeader > text {
-  font-family: "Proxima Nova Light";
+  font-family: "Proxima Nova Light", sans-serif;
   font-size: 72px;
   font-weight: 100;
   text-anchor: middle;
@@ -54,7 +58,7 @@
 }
 
 .bulletedItemText {
-  font-family: "Work Sans";
+  font-family: "Work Sans", sans-serif;
   font-size: 48px;
 }
 
@@ -76,4 +80,12 @@
 .slideFooter > text {
   font-size: 24px;
   text-anchor: middle;
+}
+
+.editorGlyphMargin {
+  content: url(data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2248%22%20height%3D%2248%22%20viewBox%3D%220%200%2048%2048%22%3E%3Cpath%20fill%3D%22%230E7E12%22%20d%3D%22M34%206H14c-2.21%200-3.98%201.79-3.98%204L10%2042l14-6%2014%206V10c0-2.21-1.79-4-4-4zm0%2030l-10-4.35L14%2036V10h20v26z%22%2F%3E%3C%2Fsvg%3E);
+}
+
+.editorLineHighlight {
+  background: rgba(14, 126, 18, .25);
 }
