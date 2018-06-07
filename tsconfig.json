@@ -38,7 +38,6 @@
   },
   "exclude": [
     "node_modules",
-    "./node_modules/@types/react-redux",
     "build",
     "scripts",
     "acceptance-tests",

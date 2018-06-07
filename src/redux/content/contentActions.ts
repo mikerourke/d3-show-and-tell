@@ -7,6 +7,7 @@ import {
   selectSlideValuesForSlideNumber,
 } from './contentSelectors';
 import { State } from '../reducers';
+import { API_URL } from '@constants';
 
 export const allSlidesFetchStarted = createAction(
   '@content/FETCH_ALL_SLIDES_STARTED',
@@ -23,10 +24,8 @@ export const updateActiveEditorTab = createAction(
   (contentType: ContentType) => contentType,
 );
 
-const apiUrl = 'http://localhost:3000';
-
 const fetchFile = (fileName: string) =>
-  fetch(`${apiUrl}/content/${fileName}.json`)
+  fetch(`${API_URL}/content/${fileName}.json`)
     .then((response: any) => response.json())
     .catch(error => error);
 
