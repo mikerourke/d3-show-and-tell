@@ -1,14 +1,9 @@
-import { handleActions, combineActions } from 'redux-actions';
+import { handleActions } from 'redux-actions';
 import {
-  allSlidesFetchStarted,
-  allSlidesFetchSuccess,
-  allSlidesFetchFailure,
+  allSlidesContentLoaded,
   updateActiveEditorTab,
 } from './contentActions';
-import {
-  ContentType,
-  SlideValuesModel,
-} from '../../types/contentTypes';
+import { ContentType, SlideValuesModel } from '../../types/contentTypes';
 
 export interface ContentState {
   readonly activeEditorTab: ContentType;
@@ -18,19 +13,17 @@ export interface ContentState {
   readonly slideValuesBySlideNumber: {
     [slideNumber: string]: SlideValuesModel;
   };
-  readonly isLoading: boolean;
 }
 
 export const initialState: ContentState = {
   activeEditorTab: ContentType.Code,
   datasetsByName: {},
   slideValuesBySlideNumber: {},
-  isLoading: false,
 };
 
 const contentReducer = handleActions(
   {
-    [allSlidesFetchSuccess.toString()]: (
+    [allSlidesContentLoaded.toString()]: (
       state: ContentState,
       { payload: { datasets, slides } }: any,
     ) => ({
@@ -45,19 +38,6 @@ const contentReducer = handleActions(
     ) => ({
       ...state,
       activeEditorTab: contentType,
-    }),
-
-    [allSlidesFetchStarted.toString()]: (state: ContentState) => ({
-      ...state,
-      isLoading: true,
-    }),
-
-    [combineActions(
-      allSlidesFetchSuccess.toString(),
-      allSlidesFetchFailure.toString(),
-    ) as any]: (state: ContentState) => ({
-      ...state,
-      isLoading: false,
     }),
   },
   initialState,

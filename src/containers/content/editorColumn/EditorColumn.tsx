@@ -2,7 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { css } from 'emotion';
 import ReactTooltip from 'react-tooltip';
-import { applyChangesToContent } from '@utils/codeUtils';
+import { applyChangesToContent, extrapolatePaths } from '@utils/codeUtils';
 import {
   highlightBookmarks,
   loadCursorPosition,
@@ -104,9 +104,11 @@ export class EditorColumnComponent extends React.Component<Props, State> {
 
   private handleActiveEditorTabChange = (tabIndex: number) => {
     saveStateForContentType(this.editor, this.props.activeEditorTab);
-    this.props.onUpdateActiveEditorTab(tabIndex);
-    setTimeout(() => {
-      this.setValueForActiveTab(tabIndex);
+    extrapolatePaths().then(() => {
+      this.props.onUpdateActiveEditorTab(tabIndex);
+      setTimeout(() => {
+        this.setValueForActiveTab(tabIndex);
+      });
     });
   };
 

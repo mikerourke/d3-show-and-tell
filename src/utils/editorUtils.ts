@@ -22,17 +22,15 @@ export const configureMonaco = (monaco: Monaco) => {
     typeRoots: ['node_modules/@types', './definitions'],
   };
 
-  ['javascript', 'typescript'].forEach((languageName: string) => {
-    const defaultsName = `${languageName}Defaults`;
-    monaco.languages.typescript[defaultsName].setMaximumWorkerIdleTime(-1);
-    monaco.languages.typescript[defaultsName].setCompilerOptions(
-      compilerDefaults,
-    );
-    monaco.languages.typescript[defaultsName].setEagerModelSync(true);
-    monaco.languages.typescript[defaultsName].setDiagnosticsOptions({
-      noSemanticValidation: true,
-      noSyntaxValidation: false,
-    });
+  const defaultsName = 'javascriptDefaults';
+  monaco.languages.typescript[defaultsName].setMaximumWorkerIdleTime(-1);
+  monaco.languages.typescript[defaultsName].setCompilerOptions(
+    compilerDefaults,
+  );
+  monaco.languages.typescript[defaultsName].setEagerModelSync(true);
+  monaco.languages.typescript[defaultsName].setDiagnosticsOptions({
+    noSemanticValidation: true,
+    noSyntaxValidation: false,
   });
 };
 

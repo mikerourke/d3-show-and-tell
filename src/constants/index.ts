@@ -1,5 +1,3 @@
-export const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000';
-
 export const elementHeights = {
   APP_HEADER: 48,
   APP_HEADER_WITH_MARGINS: 64,

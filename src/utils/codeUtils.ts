@@ -99,6 +99,17 @@ export const populateAndExecuteCode = (code: string, data: string | object) => {
   }
 };
 
+export const extrapolatePaths = async () => {
+  setTimeout(() => {
+    const paths = getPathComponentsFromContents();
+    const NO_PATHS = `// There are no <path> elements in your Code file!`;
+    setStorageForContentType(ContentType.Paths, {
+      value: paths || NO_PATHS,
+    });
+    return Promise.resolve();
+  }, 0);
+};
+
 export const applyChangesToContent = (
   contentType?: ContentType,
   newValue?: any,
@@ -115,12 +126,9 @@ export const applyChangesToContent = (
         }, 100);
       } else {
         setTimeout(() => {
-          const paths = getPathComponentsFromContents();
-          const NO_PATHS = `// There are no <path> elements in your Code file!`;
-          setStorageForContentType(ContentType.Paths, {
-            value: paths || NO_PATHS,
+          extrapolatePaths().then(() => {
+            resolve();
           });
-          resolve();
         }, 500);
       }
     } catch (error) {

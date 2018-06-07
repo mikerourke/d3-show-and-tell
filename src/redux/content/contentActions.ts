@@ -7,37 +7,17 @@ import {
   selectSlideValuesForSlideNumber,
 } from './contentSelectors';
 import { State } from '../reducers';
-import { API_URL } from '@constants';
+import datasets from './slides/datasets';
+import slides from './slides/slides';
 
-export const allSlidesFetchStarted = createAction(
-  '@content/FETCH_ALL_SLIDES_STARTED',
-);
-export const allSlidesFetchSuccess = createAction(
-  '@content/FETCH_ALL_SLIDES_SUCCESS',
+export const allSlidesContentLoaded = createAction(
+  '@content/FETCH_ALL_SLIDES_CONTENT_LOADED',
   (datasets: any, slides: any) => ({ datasets, slides }),
-);
-export const allSlidesFetchFailure = createAction(
-  '@content/FETCH_ALL_SLIDES_FAILURE',
 );
 export const updateActiveEditorTab = createAction(
   '@content/UPDATE_ACTIVE_EDITOR_TAB',
   (contentType: ContentType) => contentType,
 );
-
-const fetchFile = (fileName: string) =>
-  fetch(`${API_URL}/content/${fileName}.json`)
-    .then((response: any) => response.json())
-    .catch(error => error);
-
-export const fetchAllSlideContents = (): any => dispatch => {
-  dispatch(allSlidesFetchStarted());
-  const fileNames = ['datasets', 'slides'];
-  return Promise.all(fileNames.map(fileName => fetchFile(fileName)))
-    .then(([datasets, slides]) =>
-      dispatch(allSlidesFetchSuccess(datasets, slides)),
-    )
-    .catch(() => dispatch(allSlidesFetchFailure()));
-};
 
 const populateStorageWithSlideContents = (
   getState: () => State,
@@ -58,13 +38,28 @@ const populateStorageWithSlideContents = (
   });
 };
 
+const waitForContents = async () => {
+  if (Object.keys(datasets).length !== 0 && Object.keys(slides).length !== 0) {
+    return Promise.resolve();
+  }
+  if (!datasets || !slides) {
+    setTimeout(() => {
+      waitForContents();
+    }, 250);
+  }
+};
+
 export const initializeStorage = (): any => async (dispatch, getState) => {
-  await dispatch(fetchAllSlideContents());
+  await waitForContents();
+  dispatch(allSlidesContentLoaded(datasets, slides));
   const slideNumber = getCurrentSlideNumber();
-  populateStorageWithSlideContents(getState, slideNumber, {
-    lineNumber: 1,
-    columnNumber: 1,
-  });
+  setTimeout(() => {
+    populateStorageWithSlideContents(getState, slideNumber, {
+      lineNumber: 1,
+      columnNumber: 1,
+    });
+    return Promise.resolve();
+  }, 1000);
 };
 
 export const updateStorageForSlideNumber = (slideNumber: number): any => (
