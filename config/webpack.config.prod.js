@@ -9,7 +9,7 @@ const ManifestPlugin = require('webpack-manifest-plugin');
 const InterpolateHtmlPlugin = require('react-dev-utils/InterpolateHtmlPlugin');
 const SWPrecacheWebpackPlugin = require('sw-precache-webpack-plugin');
 const ModuleScopePlugin = require('react-dev-utils/ModuleScopePlugin');
-// const MonacoWebpackPlugin = require('monaco-editor-webpack-3-plugin');
+const MonacoWebpackPlugin = require('monaco-editor-webpack-3-plugin');
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
 const paths = require('./paths');
@@ -356,9 +356,13 @@ module.exports = {
       tsconfig: paths.appTsConfig,
       tslint: paths.appTsLint,
     }),
-    // new MonacoWebpackPlugin({
-    //   languages: ['css', 'json', 'javascript'],
-    // }),
+    new MonacoWebpackPlugin({
+      languages: ['css', 'json', 'javascript'],
+    }),
+    new webpack.IgnorePlugin(
+      /^((fs)|(path)|(os)|(crypto)|(source-map-support))$/,
+      /vs(\/|\\)language(\/|\\)typescript(\/|\\)lib/,
+    ),
   ],
   // Some libraries import Node modules but don't use them in the browser.
   // Tell Webpack to provide empty mocks for them so importing them works.
