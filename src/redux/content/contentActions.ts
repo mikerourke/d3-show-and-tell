@@ -25,7 +25,7 @@ const populateStorageWithSlideContents = (
   position?: any,
 ) => {
   const { code, styles, data } = slideValues;
-  const values = [code, styles, JSON.stringify(data), ''];
+  const values = [code, styles, data, ''];
   const languages = ['javascript', 'css', 'json', 'javascript'];
 
   contentTypeArray.forEach(contentType => {
@@ -40,7 +40,8 @@ const populateStorageWithSlideContents = (
 export const initializeStorage = (): any => async dispatch => {
   dispatch(allSlidesContentLoaded(datasets, slides));
   const slideNumber = getCurrentSlideNumber();
-  populateStorageWithSlideContents(firstSlide, slideNumber, {
+  const slideValues = { ...firstSlide, data: JSON.stringify(firstSlide.data) };
+  populateStorageWithSlideContents(slideValues, slideNumber, {
     lineNumber: 1,
     columnNumber: 1,
   });
