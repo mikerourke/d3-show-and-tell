@@ -5,6 +5,7 @@
   "description": "D3 Show and Tell",
   "repository": "https://github.com/mikerourke/d3-show-and-tell.git",
   "author": "Wolf <mike.w.rourke@gmail.com>",
+  "homepage": "https://mikerourke.github.io/d3-show-and-tell/",
   "license": "MIT",
   "scripts": {
     "start": "node scripts/start.js",
