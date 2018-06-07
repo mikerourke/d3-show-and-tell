@@ -5,11 +5,11 @@
   "description": "D3 Show and Tell",
   "repository": "https://github.com/mikerourke/d3-show-and-tell.git",
   "author": "Wolf <mike.w.rourke@gmail.com>",
-  "homepage": "https://mikerourke.github.io/d3-show-and-tell/",
+  "homepage": "http://d3-show-and-tell.surge.sh/",
   "license": "MIT",
   "scripts": {
     "start": "node scripts/start.js",
-    "prebuild": "rm -rf ./docs && mkdir docs",
+    "prebuild": "rm -rf ./build && mkdir build",
     "build": "node scripts/build.js",
     "test": "node scripts/test.js --env=jsdom",
     "lint": "tslint -c tslint.json -p tsconfig.json || exit 0",
