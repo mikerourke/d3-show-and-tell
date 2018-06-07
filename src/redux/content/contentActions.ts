@@ -6,12 +6,12 @@ import {
   selectContentValuesForReset,
   selectSlideValuesForSlideNumber,
 } from './contentSelectors';
-import { State } from '../reducers';
+import firstSlide from './slides/firstSlide';
 import datasets from './slides/datasets';
 import slides from './slides/slides';
 
 export const allSlidesContentLoaded = createAction(
-  '@content/FETCH_ALL_SLIDES_CONTENT_LOADED',
+  '@content/ALL_SLIDES_CONTENT_LOADED',
   (datasets: any, slides: any) => ({ datasets, slides }),
 );
 export const updateActiveEditorTab = createAction(
@@ -20,13 +20,12 @@ export const updateActiveEditorTab = createAction(
 );
 
 const populateStorageWithSlideContents = (
-  getState: () => State,
+  slideValues: any,
   slideNumber: number,
   position?: any,
 ) => {
-  const slideValues = selectSlideValuesForSlideNumber(getState())(slideNumber);
   const { code, styles, data } = slideValues;
-  const values = [code, styles, data, ''];
+  const values = [code, styles, JSON.stringify(data), ''];
   const languages = ['javascript', 'css', 'json', 'javascript'];
 
   contentTypeArray.forEach(contentType => {
@@ -38,35 +37,22 @@ const populateStorageWithSlideContents = (
   });
 };
 
-const waitForContents = async () => {
-  if (Object.keys(datasets).length !== 0 && Object.keys(slides).length !== 0) {
-    return Promise.resolve();
-  }
-  if (!datasets || !slides) {
-    setTimeout(() => {
-      waitForContents();
-    }, 250);
-  }
-};
-
-export const initializeStorage = (): any => async (dispatch, getState) => {
-  await waitForContents();
+export const initializeStorage = (): any => async dispatch => {
   dispatch(allSlidesContentLoaded(datasets, slides));
   const slideNumber = getCurrentSlideNumber();
-  setTimeout(() => {
-    populateStorageWithSlideContents(getState, slideNumber, {
-      lineNumber: 1,
-      columnNumber: 1,
-    });
-    return Promise.resolve();
-  }, 1000);
+  populateStorageWithSlideContents(firstSlide, slideNumber, {
+    lineNumber: 1,
+    columnNumber: 1,
+  });
+  return setTimeout(() => Promise.resolve(), 100);
 };
 
 export const updateStorageForSlideNumber = (slideNumber: number): any => (
   dispatch,
   getState,
 ) => {
-  populateStorageWithSlideContents(getState, slideNumber);
+  const slideValues = selectSlideValuesForSlideNumber(getState())(slideNumber);
+  populateStorageWithSlideContents(slideValues, slideNumber);
 };
 
 export const resetActiveTabContents = (contentType: ContentType): any => (

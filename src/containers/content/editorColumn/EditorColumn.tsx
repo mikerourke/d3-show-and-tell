@@ -1,5 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
+import get from 'lodash/get';
 import { css } from 'emotion';
 import ReactTooltip from 'react-tooltip';
 import { applyChangesToContent, extrapolatePaths } from '@utils/codeUtils';
@@ -68,12 +69,17 @@ export class EditorColumnComponent extends React.Component<Props, State> {
       this.editor.focus();
     }
 
-    setTimeout(() => highlightBookmarks(this.editor), 100);
+    if (this.state.editorValue === this.state.editorValue) {
+      setTimeout(() => highlightBookmarks(this.editor), 50);
+    }
   }
 
   private setValueForActiveTab = (contentType: ContentType) => {
-    const { value, language } = getStorageForContentType(contentType);
-    this.setState({ editorValue: value, editorLanguage: language });
+    const currentStorage = getStorageForContentType(contentType);
+    this.setState({
+      editorValue: get(currentStorage, 'value', ''),
+      editorLanguage: get(currentStorage, 'language', 'javascript'),
+    });
     loadCursorPosition(this.editor, this.props.activeEditorTab);
     this.editor.focus();
   };

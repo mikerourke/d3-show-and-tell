@@ -41,6 +41,18 @@ const validateJson = (jsonString: string) => {
   }
 };
 
+const retryValidateData = (content: any) => {
+  if (validateJson(content)) {
+    const stringifiedContent = JSON.stringify(content);
+    return JSON.parse(stringifiedContent);
+  }
+  try {
+    return JSON.parse(content);
+  } catch (error) {
+    return {};
+  }
+};
+
 export const getValidContent = (
   contentType: ContentType,
   content: any,
@@ -49,9 +61,8 @@ export const getValidContent = (
     return content;
   }
 
-  if (contentType === ContentType.Data && validateJson(content)) {
-    const stringifiedContent = JSON.stringify(content);
-    return JSON.parse(stringifiedContent);
+  if (contentType === ContentType.Data) {
+    return retryValidateData(content);
   }
 
   return content;
