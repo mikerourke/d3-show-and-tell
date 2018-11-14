@@ -2,8 +2,8 @@ import React from 'react';
 import { default as MonacoEditor } from 'react-monaco-editor';
 import { elementHeights } from '@constants';
 import { configureMonaco, addEditorActions } from '@utils/editorUtils';
-import { BoxDimensions, CodeEditor, Monaco } from '@customTypes/commonTypes';
-import { ContentType } from '@customTypes/contentTypes';
+import { BoxDimensions, CodeEditor, Monaco } from '@customTypes/common';
+import { ContentType } from '@customTypes/content';
 
 interface Props {
   contentType: ContentType;
@@ -19,13 +19,25 @@ interface State {
   windowDimensions: BoxDimensions;
 }
 
-const MAX_HEIGHT = 928;
-
+/**
+ * Returns the current window inner dimensions.
+ */
 const getScreenDimensions = (): BoxDimensions => ({
   height: window.innerHeight,
   width: window.innerWidth,
 });
 
+/**
+ * Monaco editor instance used to manipulate code (left column).
+ * @param contentType Type of content displayed in editor.
+ * @param language Programming language to use.
+ * @param value Contents of the editor.
+ * @param onEditorDidMount Action to perform when the editor component mounts.
+ * @param onEditorChange Action to perform when the editor content changes.
+ * @param onSaveKeysPressed Action to perform when the save keys are pressed.
+ * @param onUpdateTabKeysPressed Action to perform when the keyboard shortcut
+ *    to update the active tab is pressed.
+ */
 export default class Editor extends React.Component<Props, State> {
   state = {
     windowDimensions: getScreenDimensions(),
@@ -54,11 +66,18 @@ export default class Editor extends React.Component<Props, State> {
     editor.focus();
   };
 
-  getEditorDimensions = (): any => {
+  /**
+   * Calculate the new dimensions of the editor based on the window inner height
+   *   and width.
+   */
+  getEditorDimensions = (): BoxDimensions => {
     const { height, width } = this.state.windowDimensions;
     const { APP_HEADER, COLUMN_HEADER, EDITOR_TABS } = elementHeights;
+
+    const MAX_HEIGHT = 928;
     const heightSubtractor = APP_HEADER + COLUMN_HEADER + EDITOR_TABS + 64;
     const calculatedHeight = height - heightSubtractor;
+
     return {
       height: calculatedHeight <= MAX_HEIGHT ? calculatedHeight : MAX_HEIGHT,
       width: width / 2 - 32,

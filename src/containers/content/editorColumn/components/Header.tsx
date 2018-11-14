@@ -19,10 +19,20 @@ interface Props {
   onTabClick: (tabIndex: number) => void;
 }
 
+/**
+ * Editor header with tabs for navigating code types and Save/Reset buttons to
+ *    apply changes.
+ * @param activeTab Current active editor tab.
+ * @param onResetClick Action to perform when Reset button is clicked.
+ * @param onSaveClick Action to perform when Save button is clicked.
+ * @param onTabClick Action to perform when a tab is clicked.
+ * @functional
+ */
 const Header: React.SFC<Props> = ({
+  activeTab,
   onResetClick,
   onSaveClick,
-  ...rest
+  onTabClick,
 }) => (
   <Navbar
     className={css`
@@ -36,7 +46,8 @@ const Header: React.SFC<Props> = ({
           <HeaderTab
             key={contentType}
             contentType={contentType}
-            {...rest}
+            isActive={contentType === activeTab}
+            onTabClick={onTabClick}
           />
         ))}
         <ReactTooltip

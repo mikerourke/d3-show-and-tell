@@ -1,44 +1,43 @@
 import React from 'react';
-import classnames from 'classnames';
+import cx from 'classnames';
 import { NavbarItem } from 'bloomer';
 import { css } from 'emotion';
-import { ContentType } from '@customTypes/contentTypes';
 import { getNameForContentType } from '@utils/commonUtils';
+import { ContentType } from '@customTypes/content';
 
 interface Props {
-  activeTab: ContentType;
+  isActive: boolean;
   contentType: ContentType;
   onTabClick: (tabIndex: number) => void;
 }
 
-const HeaderTab: React.SFC<Props> = ({
-  activeTab,
-  contentType,
-  onTabClick,
-}) => {
-  const activeItemStyle = css`
-    border-bottom: 2px solid var(--pandera-blue);
-  `;
-
-  const navbarItemStyle = css`
-    cursor: pointer;
-  `;
-
-  const isActive = activeTab === contentType;
-
-  return (
-    <NavbarItem
-      data-for="tabTooltip"
-      data-tip={`⌥ + ${contentType + 1}`}
-      onClick={() => onTabClick(contentType)}
-      isActive={isActive}
-      className={classnames(navbarItemStyle, {
-        [activeItemStyle]: isActive,
-      })}
-    >
-      {getNameForContentType(contentType)}
-    </NavbarItem>
-  );
-};
+/**
+ * Single tab element with the Header that corresponds with contents (e.g.
+ *    Code, Styles, etc.)
+ * @param isActive Indicates if the tab is active.
+ * @param contentType Type of content associated with the tab.
+ * @param onTabClick Action to perform when the tab is clicked.
+ * @functional
+ */
+const HeaderTab: React.SFC<Props> = ({ isActive, contentType, onTabClick }) => (
+  <NavbarItem
+    data-for="tabTooltip"
+    data-tip={`⌥ + ${contentType + 1}`}
+    onClick={() => onTabClick(contentType)}
+    isActive={isActive}
+    className={cx(
+      css`
+        cursor: pointer;
+      `,
+      {
+        [css`
+          border-bottom: 2px solid var(--pandera-blue);
+        `]: isActive,
+      },
+    )}
+  >
+    {getNameForContentType(contentType)}
+  </NavbarItem>
+);
 
 export default HeaderTab;

@@ -1,7 +1,6 @@
 import * as babel from 'babel-standalone';
 import * as babylon from 'babylon';
 import isNil from 'lodash/isNil';
-import { ContentType } from '@customTypes/contentTypes';
 import {
   getStorageForAllContentTypes,
   setStorageForContentType,
@@ -10,8 +9,13 @@ import {
   getPathComponentsFromContents,
   updatePathsFromChanges,
 } from '@utils/svgPathUtils';
+import { ContentType } from '@customTypes/content';
 
-export const getTransformedCode = (codeString: string) => {
+/**
+ * Returns the transpiled code by transforming input with Babel.
+ * @param codeString ESNext/React code to transform.
+ */
+export const getTransformedCode = (codeString: string): string => {
   const transformedCode = babel.transform(codeString, {
     plugins: ['transform-react-jsx', 'transform-object-rest-spread'],
     presets: ['es2015'],
@@ -19,7 +23,12 @@ export const getTransformedCode = (codeString: string) => {
   return transformedCode.code;
 };
 
-const validateCode = (codeString: string) => {
+/**
+ * Attempts to parse the specified code to ensure it's valid. If valid, return
+ *    true, otherwise false.
+ * @param codeString Code string to validate.
+ */
+const validateCode = (codeString: string): boolean => {
   try {
     const options: any = {
       sourceType: 'script',
@@ -32,6 +41,11 @@ const validateCode = (codeString: string) => {
   }
 };
 
+/**
+ * Attempts to parse the specified JSON string to see if it's valid. If valid,
+ *    return true, otherwise false.
+ * @param jsonString String of JSON to parse and validate.
+ */
 const validateJson = (jsonString: string) => {
   try {
     JSON.parse(jsonString);
@@ -41,9 +55,14 @@ const validateJson = (jsonString: string) => {
   }
 };
 
+/**
+ * Validates either code or JSON (depending on contentType specified).
+ * @param contentType Type of content to validate.
+ * @param content Content to validate.
+ */
 export const getValidContent = (
   contentType: ContentType,
-  content: any,
+  content: string,
 ): any => {
   if (contentType === ContentType.Code && validateCode(content)) {
     return content;
@@ -57,6 +76,13 @@ export const getValidContent = (
   return content;
 };
 
+/**
+ * Appends a DOM element to the current page.
+ * @param identifier Value to use for `id` attribute.
+ * @param documentLocation Location on HTML document to append (<body> or
+ *    <head>).
+ * @param elementToAppend DOM element to append to HTML document.
+ */
 const appendChildElementToPage = (
   identifier: string,
   documentLocation: 'body' | 'head',
@@ -72,6 +98,10 @@ const appendChildElementToPage = (
   documentElement.appendChild(elementToAppend);
 };
 
+/**
+ * Appends a <style> element to the current page.
+ * @param styles Text contents for <style> element.
+ */
 export const appendCustomStyleToPage = (styles: string) => {
   const styleElement = document.createElement('style');
   styleElement.type = 'text/css';
@@ -79,6 +109,12 @@ export const appendCustomStyleToPage = (styles: string) => {
   appendChildElementToPage('custom-styles', 'head', styleElement);
 };
 
+/**
+ * If the specified code and data are valid, transform the code, update the
+ *    contents in the editor, and execute it.
+ * @param code Code value to populate editor.
+ * @param data Data value to populate editor.
+ */
 export const populateAndExecuteCode = (code: string, data: string | object) => {
   if (!validateCode(code)) return;
 
@@ -87,7 +123,7 @@ export const populateAndExecuteCode = (code: string, data: string | object) => {
   if (!isNil(contentsElement)) contentsElement.innerHTML = '';
 
   const validCode = getValidContent(ContentType.Code, code);
-  const validData = getValidContent(ContentType.Data, data);
+  const validData = getValidContent(ContentType.Data, data as string);
   const content = `
       var currentData = ${validData};
       ${getTransformedCode(validCode)}
@@ -99,6 +135,9 @@ export const populateAndExecuteCode = (code: string, data: string | object) => {
   }
 };
 
+/**
+ * Parse the `<path>` elements and update storage.
+ */
 export const extrapolatePaths = async () => {
   setTimeout(() => {
     const paths = getPathComponentsFromContents();
@@ -110,15 +149,21 @@ export const extrapolatePaths = async () => {
   }, 0);
 };
 
+/**
+ * Update the content on the page.
+ * @param contentType Type of content to update.
+ * @param newValue
+ */
 export const applyChangesToContent = (
   contentType?: ContentType,
-  newValue?: any,
+  newValue?: string,
 ) =>
   new Promise((resolve, reject) => {
     try {
       const { code, data, styles } = getStorageForAllContentTypes();
       appendCustomStyleToPage(styles.value);
       populateAndExecuteCode(code.value, data.value);
+
       if (contentType === ContentType.Paths) {
         setTimeout(() => {
           updatePathsFromChanges(newValue);

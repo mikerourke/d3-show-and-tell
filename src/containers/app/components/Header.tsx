@@ -7,6 +7,12 @@ interface Props {
   onToggleSidebar: () => void;
 }
 
+/**
+ * Header toolbar for application with menu button and title text.
+ * @param onToggleSidebar Toggles sidebar visibility when hamburger menu
+ *    button is pressed.
+ * @functional
+ */
 const Header: React.SFC<Props> = ({ onToggleSidebar }) => (
   <Navbar
     className={css`

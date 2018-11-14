@@ -16,6 +16,12 @@ interface Props {
   slideTitle: string;
 }
 
+/**
+ * Title bar above current active slide with buttons to navigate to next and
+ *    previous slides.
+ * @param slideNumber Current active slide number.
+ * @param slideTitle Title to display in above the slide.
+ */
 export default class SlideNavigation extends React.Component<Props> {
   render() {
     const iconStyle = css`

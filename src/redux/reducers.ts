@@ -1,15 +1,23 @@
 import { combineReducers } from 'redux';
-import app, { AppState } from './app/appReducer';
+import { Dispatch as FixedDispatch } from 'redux-fixed';
 import content, { ContentState } from './content/contentReducer';
 
 export default combineReducers({
-  app,
   content,
 });
 
 export interface State {
-  app: AppState;
   content: ContentState;
 }
 
+export type Dispatch<T> = FixedDispatch<T>;
 export type GetState = () => State;
+
+export interface BaseReduxAction {
+  type: string;
+}
+
+export interface ReduxAction<Payload> extends BaseReduxAction {
+  payload?: Payload;
+  error?: boolean;
+}

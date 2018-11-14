@@ -1,11 +1,14 @@
-import * as React from 'react';
+import React from 'react';
 import { BrowserRouter, Switch, Route, Redirect } from 'react-router-dom';
 import { ROUTES } from '@constants';
-import Root from './containers/root/Root';
-import App from './containers/app/App';
+import App from '@containers/app/App';
 
-const Routes = () => (
-  <Root>
+/**
+ * Routes handler for the entire application.
+ * @functional
+ */
+const Routes: React.SFC = () => (
+  <div>
     <BrowserRouter>
       <Switch>
         <Route path="/:path" component={App} />
@@ -15,7 +18,7 @@ const Routes = () => (
         />
       </Switch>
     </BrowserRouter>
-  </Root>
+  </div>
 );
 
 export default Routes;

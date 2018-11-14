@@ -1,3 +1,6 @@
+/**
+ * Pixel height for UI elements (used for calculating Editor dimensions).
+ */
 export const elementHeights = {
   APP_HEADER: 48,
   APP_HEADER_WITH_MARGINS: 64,

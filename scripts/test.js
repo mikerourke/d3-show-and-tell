@@ -17,6 +17,7 @@ require('../config/env');
 
 const jest = require('jest');
 let argv = process.argv.slice(2);
+argv.push('--config=jest.config.json');
 
 // Watch unless on CI, in coverage mode, or explicitly running all tests
 if (
@@ -26,6 +27,5 @@ if (
 ) {
   argv.push('--watch');
 }
-
 
 jest.run(argv);

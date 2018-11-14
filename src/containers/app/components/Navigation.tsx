@@ -1,18 +1,25 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { selectSlideTitles } from '@redux/content/contentSelectors';
-import { State as ReduxState } from '@redux/reducers';
+import { selectSlideTitleRecords } from '@redux/content/contentSelectors';
 import Header from './Header';
 import Sidebar from './Sidebar';
+import { ReduxState } from '@customTypes/common';
+import { SlideTitleModel } from '@customTypes/content';
 
 interface Props {
-  slideTitles: any[];
+  slideTitleRecords: SlideTitleModel[];
 }
 
 interface State {
   sidebarOpen: boolean;
 }
 
+/**
+ * Wrapper for Header and Sidebar navigation elements.
+ * @param slideTitleRecords Array of objects with slide number and corresponding
+ *    title for slide.
+ * @connected
+ */
 class Navigation extends React.Component<Props, State> {
   state = {
     sidebarOpen: false,
@@ -27,14 +34,13 @@ class Navigation extends React.Component<Props, State> {
   };
 
   render() {
-    const { slideTitles } = this.props;
     return (
       <React.Fragment>
         <Header onToggleSidebar={this.handleToggleSidebar} />
         <Sidebar
           open={this.state.sidebarOpen}
           onToggleSidebar={this.handleToggleSidebar}
-          slideTitles={slideTitles}
+          slideTitleRecords={this.props.slideTitleRecords}
         />
       </React.Fragment>
     );
@@ -42,5 +48,5 @@ class Navigation extends React.Component<Props, State> {
 }
 
 export default connect((state: ReduxState) => ({
-  slideTitles: selectSlideTitles(state),
+  slideTitleRecords: selectSlideTitleRecords(state),
 }))(Navigation);

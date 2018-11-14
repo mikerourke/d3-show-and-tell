@@ -1,13 +1,17 @@
 import * as globalMonaco from 'monaco-editor';
 import get from 'lodash/get';
-import { ContentType } from '@customTypes/contentTypes';
-import { CodeEditor, Direction, Monaco } from '@customTypes/commonTypes';
+import { ContentType } from '@customTypes/content';
+import { CodeEditor, Direction, Monaco } from '@customTypes/common';
 import {
   getStorageForContentType,
-  setStorageForContentType,
   setStorageForAllContentTypes,
+  setStorageForContentType,
 } from '@utils/storageUtils';
 
+/**
+ * Configures the specified Monaco instance with the appropriate options.
+ * @param monaco Monaco editor instance.
+ */
 export const configureMonaco = (monaco: Monaco) => {
   const compilerDefaults = {
     allowJs: true,
@@ -34,33 +38,40 @@ export const configureMonaco = (monaco: Monaco) => {
   });
 };
 
+/**
+ * Moves the focus in the editor to the previous or next bookmark or React
+ *    Component (specified by the direction).
+ * @param editor Editor instance to navigate.
+ * @param direction Direction to move (jump to previous or next).
+ * @param skipToBookmark Indicates if the bookmark should be jumped to.
+ */
 export const goToBookmarkOrComponent = (
   editor: CodeEditor,
   direction: Direction,
   skipToBookmark: boolean,
 ) => {
   const { findFnName, startIncrement } = {
-    previous: {
+    [Direction.Previous]: {
       findFnName: 'findPreviousMatch',
       startIncrement: 0,
     },
-    next: {
+    [Direction.Next]: {
       findFnName: 'findNextMatch',
       startIncrement: 1,
     },
   }[direction];
   const { lineNumber } = editor.getPosition();
 
-  const goToMatch = editor
-    .getModel()
-    [findFnName](
-      skipToBookmark ? /@bookmark/ : /<[a-zA-z]/,
-      { column: 1, lineNumber: lineNumber + startIncrement },
-      true,
-      false,
-      null,
-      false,
-    );
+  const goToMatch = editor.getModel()[findFnName](
+    // If skipToBookmark = false, find the next/previous React component:
+    skipToBookmark ? /@bookmark/ : /<[a-zA-z]/,
+    { column: 1, lineNumber: lineNumber + startIncrement },
+    true,
+    false,
+    null,
+    false,
+  );
+
   const targetLineNumber = get(goToMatch, ['range', 'startLineNumber'], null);
   if (targetLineNumber) {
     editor.revealLineInCenter(targetLineNumber);
@@ -69,6 +80,10 @@ export const goToBookmarkOrComponent = (
   }
 };
 
+/**
+ * Adds a green highlight to any lines containing the "@bookmark" tag.
+ * @param editor Monaco editor instance.
+ */
 export const highlightBookmarks = (editor: CodeEditor) => {
   const matches = editor
     .getModel()
@@ -102,12 +117,20 @@ export const highlightBookmarks = (editor: CodeEditor) => {
     newDecorations.push({ range, options });
   });
 
+  // This is a global variable on the Window object:
   editorDecorations = editor.deltaDecorations(
     editorDecorations,
     newDecorations,
   );
 };
 
+/**
+ * Adds actions (keyboard shortcut/context menu) to the editor for ease of
+ *    navigation and additional functionality.
+ * @param editor Monaco editor instance.
+ * @param monaco Monaco instance.
+ * @param runActions Actions (functions) to perform for a specific action.
+ */
 export const addEditorActions = (
   editor: CodeEditor,
   monaco: Monaco,
@@ -129,7 +152,7 @@ export const addEditorActions = (
     keybindingContext: null,
     contextMenuGroupId: 'bookmarks',
     contextMenuOrder: 1,
-    run: () => goToBookmarkOrComponent(editor, 'previous', true),
+    run: () => goToBookmarkOrComponent(editor, Direction.Previous, true),
   });
 
   editor.addAction({
@@ -139,7 +162,7 @@ export const addEditorActions = (
     keybindingContext: null,
     contextMenuGroupId: 'bookmarks',
     contextMenuOrder: 2,
-    run: () => goToBookmarkOrComponent(editor, 'next', true),
+    run: () => goToBookmarkOrComponent(editor, Direction.Next, true),
   });
 
   editor.addAction({
@@ -147,7 +170,7 @@ export const addEditorActions = (
     label: 'Go To Previous Element',
     keybindings: [monaco.KeyMod.Alt | monaco.KeyCode.US_OPEN_SQUARE_BRACKET],
     keybindingContext: null,
-    run: () => goToBookmarkOrComponent(editor, 'previous', false),
+    run: () => goToBookmarkOrComponent(editor, Direction.Previous, false),
   });
 
   editor.addAction({
@@ -155,7 +178,7 @@ export const addEditorActions = (
     label: 'Go To Next Element',
     keybindings: [monaco.KeyMod.Alt | monaco.KeyCode.US_CLOSE_SQUARE_BRACKET],
     keybindingContext: null,
-    run: () => goToBookmarkOrComponent(editor, 'next', false),
+    run: () => goToBookmarkOrComponent(editor, Direction.Next, false),
   });
 
   editor.addAction({
@@ -187,6 +210,11 @@ export const addEditorActions = (
   });
 };
 
+/**
+ * Pushes current editor state to localStorage.
+ * @param editor Monaco editor instance.
+ * @param contentType Content type to save state for.
+ */
 export const saveStateForContentType = (
   editor: CodeEditor,
   contentType: ContentType,
@@ -196,6 +224,12 @@ export const saveStateForContentType = (
   setStorageForContentType(contentType, { position, value });
 };
 
+/**
+ * Updates the cursor position in the editor based on the specified content
+ *    type (pulled from localStorage).
+ * @param editor Monaco editor instance.
+ * @param contentType Content type to pull stored state for.
+ */
 export const loadCursorPosition = (
   editor: CodeEditor,
   contentType: ContentType,
@@ -209,6 +243,10 @@ export const loadCursorPosition = (
   }, 0);
 };
 
+/**
+ * Resets the cursor positions for all content types in localStorage.
+ * @param editor Monaco editor instance.
+ */
 export const resetAllCursorPositions = (editor: CodeEditor) => {
   const resetPosition = { lineNumber: 1, column: 1 };
   setStorageForAllContentTypes({ position: resetPosition });

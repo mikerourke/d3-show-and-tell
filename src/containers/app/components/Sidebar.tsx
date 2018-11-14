@@ -3,13 +3,22 @@ import { Menu, MenuLabel, MenuList } from 'bloomer';
 import Drawer from 'react-motion-drawer';
 import { css } from 'emotion';
 import { Link } from 'react-router-dom';
+import { SlideTitleModel } from '@customTypes/content';
 
 interface Props {
   open: boolean;
   onToggleSidebar: () => void;
-  slideTitles: any[];
+  slideTitleRecords: SlideTitleModel[];
 }
 
+/**
+ * Sidebar drawer with slide titles as links.
+ * @param open Indicates if the sidebar is currently visible.
+ * @param onToggleSidebar Shows/hides the sidebar.
+ * @param slideTitleRecords Array of objects with slide number and title
+ *    properties.
+ * @class
+ */
 export default class Sidebar extends React.Component<Props> {
   handleLinkClick = () => {
     setTimeout(() => this.props.onToggleSidebar(), 500);
@@ -40,7 +49,7 @@ export default class Sidebar extends React.Component<Props> {
           <Menu>
             <MenuLabel>Slides</MenuLabel>
             <MenuList>
-              {this.props.slideTitles.map(({ slideNumber, title }) => (
+              {this.props.slideTitleRecords.map(({ slideNumber, title }) => (
                 <li key={slideNumber}>
                   <Link
                     to={`/slides/${slideNumber}`}

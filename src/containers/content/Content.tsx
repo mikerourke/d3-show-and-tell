@@ -11,32 +11,38 @@ interface Props {
   };
 }
 
-export default class ContentComponent extends React.Component<Props> {
-  render() {
-    const slideNumber = +this.props.match.params.slideNumber;
-    const columnStyle = css`
-      float: left;
-      width: 48%;
-      margin: 0 1%;
-      position: relative;
-    `;
+const columnStyle = css`
+  float: left;
+  width: 48%;
+  margin: 0 1%;
+  position: relative;
+`;
 
-    return (
-      <div
-        className={css`
-          margin: 8px;
-          height: calc(100% - 84px);
+/**
+ * Wrapper component for the Editor and Contents columns.
+ * @param match Router match property that slide number is extrapolated from.
+ * @functional
+ */
+const ContentComponent: React.SFC<Props> = ({
+  match: {
+    params: { slideNumber },
+  },
+}) => (
+  <div
+    className={css`
+      margin: 8px;
+      height: calc(100% - 84px);
 
-          &:after {
-            content: '';
-            display: table;
-            clear: both;
-          }
-        `}
-      >
-        <EditorColumn slideNumber={slideNumber} className={columnStyle} />
-        <ContentsColumn slideNumber={slideNumber} className={columnStyle} />
-      </div>
-    );
-  }
-}
+      &:after {
+        content: '';
+        display: table;
+        clear: both;
+      }
+    `}
+  >
+    <EditorColumn slideNumber={+slideNumber} className={columnStyle} />
+    <ContentsColumn slideNumber={+slideNumber} className={columnStyle} />
+  </div>
+);
+
+export default ContentComponent;

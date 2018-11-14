@@ -14,24 +14,28 @@ import {
   getStorageForContentType,
   setStorageForContentType,
 } from '@utils/storageUtils';
-import { selectActiveEditorTab } from '@redux/content/contentSelectors';
 import {
   resetActiveTabContents,
   updateActiveEditorTab,
   updateStorageForSlideNumber,
 } from '@redux/content/contentActions';
-import { ContentType } from '@customTypes/contentTypes';
-import { CodeEditor } from '@customTypes/commonTypes';
-import { State as ReduxState } from '@redux/reducers';
+import { selectActiveEditorTab } from '@redux/content/contentSelectors';
 import Editor from './components/Editor';
 import GoToBookmarkButton from './components/GoToBookmarkButton';
 import Header from './components/Header';
+import {
+  CodeEditor,
+  Direction,
+  ReduxDispatch,
+  ReduxState,
+} from '@customTypes/common';
+import { ContentType } from '@customTypes/content';
 
-interface StateProps {
+interface ConnectStateProps {
   activeEditorTab: ContentType;
 }
 
-interface DispatchProps {
+interface ConnectDispatchProps {
   onUpdateActiveEditorTab: (contentType: ContentType) => void;
   onUpdateStorageForSlideNumber: (slideNumber: number) => void;
   onResetActiveTabContents: (contentType: ContentType) => Promise<any>;
@@ -42,13 +46,25 @@ interface OwnProps {
   slideNumber: number;
 }
 
-type Props = StateProps & DispatchProps & OwnProps;
+type Props = ConnectStateProps & ConnectDispatchProps & OwnProps;
 
 interface State {
   editorValue: string;
   editorLanguage: string;
 }
 
+/**
+ * Connected container with editor and associated navigation components.
+ * @param activeEditorTab Current active editor tab.
+ * @param className CSS class to apply to component.
+ * @param slideNumber Number of the currently active slide.
+ * @param onUpdateActiveEditorTab Action to perform when the editor tab changes.
+ * @param onUpdateStorageForSlideNumber Action to perform when storage update
+ *    action is fired.
+ * @param onResetActiveTabContents Action to perform when the reset action is
+ *    fired.
+ * @connected
+ */
 export class EditorColumnComponent extends React.Component<Props, State> {
   editor: CodeEditor | null;
 
@@ -74,12 +90,18 @@ export class EditorColumnComponent extends React.Component<Props, State> {
     }
   }
 
+  /**
+   * Updates the editor contents based on the active tab.
+   * @param contentType Type of content associated with tab.
+   */
   private setValueForActiveTab = (contentType: ContentType) => {
     const currentStorage = getStorageForContentType(contentType);
+
     this.setState({
       editorValue: get(currentStorage, 'value', ''),
       editorLanguage: get(currentStorage, 'language', 'javascript'),
     });
+
     loadCursorPosition(this.editor, this.props.activeEditorTab);
     this.editor.focus();
   };
@@ -118,6 +140,10 @@ export class EditorColumnComponent extends React.Component<Props, State> {
     });
   };
 
+  private handleEditorChange = (editorValue: string) => {
+    this.setState({ editorValue });
+  };
+
   render() {
     return (
       <div className={this.props.className}>
@@ -131,7 +157,7 @@ export class EditorColumnComponent extends React.Component<Props, State> {
           contentType={this.props.activeEditorTab}
           value={this.state.editorValue}
           language={this.state.editorLanguage}
-          onEditorChange={editorValue => this.setState({ editorValue })}
+          onEditorChange={this.handleEditorChange}
           onEditorDidMount={this.handleEditorDidMount}
           onSaveKeysPressed={this.handleSaveAction}
           onUpdateTabKeysPressed={this.handleActiveEditorTabChange}
@@ -145,8 +171,8 @@ export class EditorColumnComponent extends React.Component<Props, State> {
             height: 104px;
           `}
         >
-          <GoToBookmarkButton editor={this.editor} goTo="previous" />
-          <GoToBookmarkButton editor={this.editor} goTo="next" />
+          <GoToBookmarkButton editor={this.editor} goTo={Direction.Previous} />
+          <GoToBookmarkButton editor={this.editor} goTo={Direction.Next} />
         </svg>
         <ReactTooltip id="bookmarkNavTooltip" delayShow={500} />
       </div>
@@ -154,11 +180,11 @@ export class EditorColumnComponent extends React.Component<Props, State> {
   }
 }
 
-export default connect(
+export default connect<ConnectStateProps, ConnectDispatchProps, OwnProps>(
   (state: ReduxState) => ({
     activeEditorTab: selectActiveEditorTab(state),
   }),
-  (dispatch: any) => ({
+  (dispatch: ReduxDispatch) => ({
     onUpdateActiveEditorTab: contentType =>
       dispatch(updateActiveEditorTab(contentType)),
     onUpdateStorageForSlideNumber: slideNumber =>

@@ -3,21 +3,25 @@ import {
   allSlidesContentLoaded,
   updateActiveEditorTab,
 } from './contentActions';
-import { ContentType, SlideValuesModel } from '../../types/contentTypes';
+import {
+  ContentType,
+  DatasetsByName,
+  SlideValuesModel,
+} from '@customTypes/content';
 
 export interface ContentState {
   readonly activeEditorTab: ContentType;
-  readonly datasetsByName: {
-    [datasetName: string]: any;
-  };
-  readonly slideValuesBySlideNumber: {
-    [slideNumber: string]: SlideValuesModel;
-  };
+  readonly datasetsByName: DatasetsByName;
+  readonly slideValuesBySlideNumber: Record<string, SlideValuesModel>;
 }
 
 export const initialState: ContentState = {
   activeEditorTab: ContentType.Code,
-  datasetsByName: {},
+  datasetsByName: {
+    stocks: [],
+    scoreBySubject: [],
+    countryScatter: [],
+  },
   slideValuesBySlideNumber: {},
 };
 
@@ -25,10 +29,10 @@ const contentReducer = handleActions(
   {
     [allSlidesContentLoaded.toString()]: (
       state: ContentState,
-      { payload: { datasets, slides } }: any,
+      { payload: { datasetsByName, slides } }: any,
     ) => ({
       ...state,
-      datasetsByName: datasets,
+      datasetsByName,
       slideValuesBySlideNumber: slides,
     }),
 

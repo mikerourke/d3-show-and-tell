@@ -5,15 +5,15 @@ import {
   getCurrentSlideNumber,
   getNameForContentType,
 } from '@utils/commonUtils';
+import { ContentType, SlideTitleModel } from '@customTypes/content';
 import { State } from '../reducers';
-import { ContentType } from '@customTypes/contentTypes';
 
 const selectDatasetsByName = createSelector(
   (state: State) => state.content.datasetsByName,
   datasetsByName => datasetsByName,
 );
 
-const selectSlidesBySlideNumber = createSelector(
+const selectSlideValuesBySlideNumber = createSelector(
   (state: State) => state.content.slideValuesBySlideNumber,
   slideValuesBySlideNumber => slideValuesBySlideNumber,
 );
@@ -22,13 +22,14 @@ export const selectActiveEditorTab = (state: State) =>
   state.content.activeEditorTab;
 
 export const selectSlideValuesForSlideNumber = createSelector(
-  [selectDatasetsByName, selectSlidesBySlideNumber],
-  (datasetsByName, slideValuesBySlideNumber) => slideNumber => {
+  [selectDatasetsByName, selectSlideValuesBySlideNumber],
+  (datasetsByName, slideValuesBySlideNumber) => (slideNumber: number) => {
     const slideValues = get(
       slideValuesBySlideNumber,
       slideNumber.toString(),
       null,
     );
+
     if (isNil(slideValues)) {
       return { title: '', code: '', styles: '', data: '' };
     }
@@ -47,39 +48,25 @@ export const selectContentValuesForReset = createSelector(
     const contentTypeName = getNameForContentType(contentType).toLowerCase();
     const slideNumber = getCurrentSlideNumber();
     const slideValues = getSlideValuesForSlideNumber(slideNumber);
+
     if (contentType === ContentType.Paths) return '';
     return get(slideValues, contentTypeName, '');
   },
 );
 
-export const selectSlideTitles = createSelector(
-  selectSlidesBySlideNumber,
-  slidesBySlideNumber =>
+export const selectSlideTitleRecords = createSelector(
+  selectSlideValuesBySlideNumber,
+  (slidesBySlideNumber): SlideTitleModel[] =>
     Object.values(slidesBySlideNumber).map(({ slideNumber, title }) => ({
       slideNumber,
       title,
     })),
 );
 
-// export const selectCurrentSlideDetails = createSelector(
-//   selectSlideTitles,
-//   slideTitles => {
-//     const slideNumber = getCurrentSlideNumber();
-//     const slideRecord = slideTitles.find(
-//       slide => slide.slideNumber === slideNumber,
-//     );
-//     const slideTitle = slideRecord ? slideRecord.title : '';
-//     return {
-//       slideTitle,
-//       slideNumber,
-//     };
-//   },
-// );
-
 export const selectCurrentSlideTitle = createSelector(
-  [selectSlideTitles, (_, slideNumber) => slideNumber],
-  (slideTitles, slideNumber) => {
-    const slideRecord = slideTitles.find(
+  [selectSlideTitleRecords, (_, slideNumber) => slideNumber],
+  (slideTitleRecords, slideNumber): string => {
+    const slideRecord = slideTitleRecords.find(
       slide => +slide.slideNumber === +slideNumber,
     );
     return slideRecord ? slideRecord.title : '';
